@@ -22,8 +22,8 @@ def on_disconnect(client, userdata, rc):
     else:
         print(f"{get_current_time_utc()}: Unexpected disconnection, result code {str(rc)}\n")
 
-topics = ['test/topic/+'] # ["/server/acrelHW/#", "/gw/acrelHW/#"]
-broker_url = "mqtt-listeners.xelerate.solutions"
+topics = ['/gw/acrelHW/+/data/+'] # ["/server/acrelHW/#", "/gw/acrelHW/#"]
+broker_url = "broker.xelerate.solutions"
 username = "delete-me-01"
 password = "ProbabyMAN767e4!"
 
