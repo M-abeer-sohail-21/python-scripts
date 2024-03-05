@@ -7,38 +7,36 @@ source = "34695733"
 values_to_plot = ['ExternalVoltage','GNSS_Status', 'GSMSignal', 'BatteryVoltage', 'Battery', 'Satellites']
 # Edit here STOP -------------
 
+all_data = []
+api_request_page_count = 1
+meas_json_file = f'meas_json_results/{source}.json'
+
+try:
+    with open(meas_json_file, 'r') as file:
+        all_data = json.load(file)
+except FileNotFoundError as e:
+    print('Error accessing measurements file:', e, 'exiting...')
+    exit()
+
+# Flatten the nested dictionaries within the 'payload' key
+flattened_data = pd.json_normalize([item['payload'] for item in all_data])
+
+# Add the 'time' column to the flattened DataFrame
+flattened_data['time'] = [item['time'] for item in all_data]
+
+# Convert 'time' column to datetime
+flattened_data['time'] = pd.to_datetime(flattened_data['time'])
+flattened_data.set_index('time', inplace=True)
+flattened_data.sort_index(inplace=True)
+
 for value_to_plot in values_to_plot:
-    all_data = []
-    api_request_page_count = 1
-    meas_json_file = f'meas_json_results/{source}.json'
-
-    try:
-        with open(meas_json_file, 'r') as file:
-            all_data = json.load(file)
-    except FileNotFoundError as e:
-        print('Error accessing measurements file:', e, 'exiting...')
-        exit()
-
-    # Flatten the nested dictionaries within the 'payload' key
-    flattened_data = pd.json_normalize([item['payload'] for item in all_data])
-
-    # Add the 'time' column to the flattened DataFrame
-    flattened_data['time'] = [item['time'] for item in all_data]
-
-    # Convert 'time' column to datetime
-    flattened_data['time'] = pd.to_datetime(flattened_data['time'])
-    flattened_data.set_index('time', inplace=True)
-    flattened_data.sort_index(inplace=True)
-
-    print(flattened_data.head(2), flattened_data.tail(2), sep='\n')
-
     unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]
 
     # Calculate the daily average of value_to_plot
-    daily_average = flattened_data[f'{value_to_plot}.value'].resample('H').mean()
+    daily_average = flattened_data[f'{value_to_plot}.value'].resample('h').mean()
 
     # Plotting scatter plot
-    plt.plot(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
+    plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
 
     # plt.plot(flattened_data.index.to_numpy(), flattened_data[f'{value_to_plot}.value'].to_numpy())
 

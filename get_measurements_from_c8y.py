@@ -1,9 +1,13 @@
 import json
 import requests
+import os
+from dotenv import load_dotenv
 
 all_data = []
 
 api_request_page_count = 1
+
+load_dotenv()
 
 while True:
     # Replace 'your_username' and 'your_password' with your actual credentials
@@ -16,7 +20,7 @@ while True:
     headers = {
         'User-Agent': 'my-app/0.0.1',
         'Accept': 'application/json',
-        'Authorization': 'Basic dDE0Njk4OTI2My9hYmVlci5zb2hhaWxAaW52aXhpYmxlLmNvbTo1SHpYeHp2XzcuLVZmMzU=',
+        'Authorization': os.getenv('AUTH'),
     }
 
     print(f'{api_request_page_count}: Making request at {url}')
