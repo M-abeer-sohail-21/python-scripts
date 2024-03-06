@@ -55,8 +55,12 @@ for source in sources:
         plt.grid(True) # Enable the grid
         plt.xticks(rotation=45) # Adjust the rotation angle as needed
 
+        output_folder = f'plots/{bike_number}'
+
         # Save the plot as a PNG file
-        plt.savefig(f'plots/{bike_number}/hourly_average_plot_{bike_number}_{value_to_plot}.png', dpi=300, bbox_inches='tight')
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        plt.savefig(f'{output_folder}/hourly_average_plot_{bike_number}_{value_to_plot}.png', dpi=300, bbox_inches='tight')
 
         # Optionally close the plot window
         plt.close()
