@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 import json
 
 # Edit here START ------------
-sources = [{"34695733": "14787"}, {"49237155": "97405"}, {"2483": "98681"}]
+sources = [("34695733","14787"), ("49237155","97405"), ("2483", "98681")]
 values_to_plot = ['ExternalVoltage','GNSS_Status', 'GSMSignal', 'BatteryVoltage', 'Battery', 'Satellites']
 # Edit here STOP -------------
 
 for source in sources:
-    source_key = list(source.keys())[0]
-    bike_number = source[source_key]
+    internal_id = source[0]
+    bike_number = source[1]
     all_data = []
     api_request_page_count = 1
-    meas_json_file = f'meas_json_results/{source_key}.json'
+    meas_json_file = f'meas_json_results/{internal_id}.json'
 
     try:
         with open(meas_json_file, 'r') as file:
@@ -32,7 +32,7 @@ for source in sources:
     flattened_data.set_index('time', inplace=True)
     flattened_data.sort_index(inplace=True)
 
-    print(source_key)
+    print(internal_id)
     print(bike_number)
     print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
     print('--------------------------------------------------------------------------------------------------------------------------------')
