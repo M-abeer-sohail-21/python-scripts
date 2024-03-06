@@ -3,51 +3,60 @@ import matplotlib.pyplot as plt
 import json
 
 # Edit here START ------------
-source = "34695733" 
+sources = [{"34695733": "14787"}, {"49237155": "97405"}, {"2483": "98681"}]
 values_to_plot = ['ExternalVoltage','GNSS_Status', 'GSMSignal', 'BatteryVoltage', 'Battery', 'Satellites']
 # Edit here STOP -------------
 
-all_data = []
-api_request_page_count = 1
-meas_json_file = f'meas_json_results/{source}.json'
+for source in sources:
+    source_key = list(source.keys())[0]
+    bike_number = source[source_key]
+    all_data = []
+    api_request_page_count = 1
+    meas_json_file = f'meas_json_results/{source_key}.json'
 
-try:
-    with open(meas_json_file, 'r') as file:
-        all_data = json.load(file)
-except FileNotFoundError as e:
-    print('Error accessing measurements file:', e, 'exiting...')
-    exit()
+    try:
+        with open(meas_json_file, 'r') as file:
+            all_data = json.load(file)
+    except FileNotFoundError as e:
+        print('Error accessing measurements file:', e, 'exiting...')
+        exit()
 
-# Flatten the nested dictionaries within the 'payload' key
-flattened_data = pd.json_normalize([item['payload'] for item in all_data])
+    # Flatten the nested dictionaries within the 'payload' key
+    flattened_data = pd.json_normalize([item['payload'] for item in all_data])
 
-# Add the 'time' column to the flattened DataFrame
-flattened_data['time'] = [item['time'] for item in all_data]
+    # Add the 'time' column to the flattened DataFrame
+    flattened_data['time'] = [item['time'] for item in all_data]
 
-# Convert 'time' column to datetime
-flattened_data['time'] = pd.to_datetime(flattened_data['time'])
-flattened_data.set_index('time', inplace=True)
-flattened_data.sort_index(inplace=True)
+    # Convert 'time' column to datetime
+    flattened_data['time'] = pd.to_datetime(flattened_data['time'])
+    flattened_data.set_index('time', inplace=True)
+    flattened_data.sort_index(inplace=True)
 
-for value_to_plot in values_to_plot:
-    unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]
+    print(source_key)
+    print(bike_number)
+    print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
+    print('--------------------------------------------------------------------------------------------------------------------------------')
 
-    # Calculate the daily average of value_to_plot
-    daily_average = flattened_data[f'{value_to_plot}.value'].resample('h').mean()
+    for value_to_plot in values_to_plot:
+        unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]
 
-    # Plotting scatter plot
-    plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
+        # Calculate the daily average of value_to_plot
+        daily_average = flattened_data[f'{value_to_plot}.value'].resample('h').mean()
 
-    # plt.plot(flattened_data.index.to_numpy(), flattened_data[f'{value_to_plot}.value'].to_numpy())
+        # Plotting scatter plot
+        plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
 
-    # Set plot title and labels
-    plt.title(f'Avg. hourly {value_to_plot} Over Time')
-    plt.xlabel('Time')
-    plt.ylabel(f'{value_to_plot} ({unit_for_value})')
-    plt.grid(True) # Enable the grid
+        # plt.plot(flattened_data.index.to_numpy(), flattened_data[f'{value_to_plot}.value'].to_numpy())
 
-    # Save the plot as a PNG file
-    plt.savefig(f'plots/hourly_average_plot_{value_to_plot}.png', dpi=300, bbox_inches='tight')
+        # Set plot title and labels
+        plt.title(f'Avg. hourly {value_to_plot} Over Time for {bike_number}')
+        plt.xlabel('Time')
+        plt.ylabel(f'{value_to_plot} ({unit_for_value})')
+        plt.grid(True) # Enable the grid
+        plt.xticks(rotation=45) # Adjust the rotation angle as needed
 
-    # Optionally close the plot window
-    plt.close()
+        # Save the plot as a PNG file
+        plt.savefig(f'plots/{bike_number}/hourly_average_plot_{bike_number}_{value_to_plot}.png', dpi=300, bbox_inches='tight')
+
+        # Optionally close the plot window
+        plt.close()
