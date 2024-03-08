@@ -1,10 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+from os import path
 
 # Edit here START ------------
-sources = [("34695733","14787"), ("49237155","97405"), ("2483", "98681")]
-values_to_plot = ['ExternalVoltage','GNSS_Status', 'GSMSignal', 'BatteryVoltage', 'Battery', 'Satellites']
+sources = [('3456', '70091'), ('46964', '12485'), ('77532', '50224'), ('2636415', '12053'), ('87107442643', '63593')]
 # Edit here STOP -------------
 
 for source in sources:
@@ -36,31 +36,6 @@ for source in sources:
     print(bike_number)
     print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
     print('--------------------------------------------------------------------------------------------------------------------------------')
+    flattened_data.to_csv(f'meas_csv_results/{bike_number}.csv')
 
-    for value_to_plot in values_to_plot:
-        unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]
-
-        # Calculate the daily average of value_to_plot
-        daily_average = flattened_data[f'{value_to_plot}.value'].resample('h').mean()
-
-        # Plotting scatter plot
-        plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
-
-        # plt.plot(flattened_data.index.to_numpy(), flattened_data[f'{value_to_plot}.value'].to_numpy())
-
-        # Set plot title and labels
-        plt.title(f'Avg. hourly {value_to_plot} Over Time for {bike_number}')
-        plt.xlabel('Time')
-        plt.ylabel(f'{value_to_plot} ({unit_for_value})')
-        plt.grid(True) # Enable the grid
-        plt.xticks(rotation=45) # Adjust the rotation angle as needed
-
-        output_folder = f'plots/{bike_number}'
-
-        # Save the plot as a PNG file
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        plt.savefig(f'{output_folder}/hourly_average_plot_{bike_number}_{value_to_plot}.png', dpi=300, bbox_inches='tight')
-
-        # Optionally close the plot window
-        plt.close()
+    

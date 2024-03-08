@@ -3,18 +3,22 @@ import requests
 import os
 from dotenv import load_dotenv
 
-sources = ["34695733", "49237155", "2483"]
+sources = [('3456', '70091'), ('46964', '12485'), ('77532', '50224'), ('1068248', '70079'), ('2002381', '17018'), ('2636415', '12053'), ('87107442643', '63593')]
+
+# ('3456', '70091'), ('46964', '12485'), , ('77532', '50224'), ('1068248', '70079'), ('2002381', '17018'), ('2636415', '12053'), ('87107442643', '63593')
+# -> Nothing for 47674, 1068248, 2002381
 
 load_dotenv()
 
-for source in sources:
+for source_tuple in sources:
+    source = source_tuple[0]
     all_data = []
     api_request_page_count = 1
     while True:
         # Replace 'your_username' and 'your_password' with your actual credentials
         tenant = "t146989263"
-        date_to = '2024-02-09T00:00:00.000Z'
-        date_from = "2024-01-18T00:00:00.000Z"
+        # date_to = '2024-02-09T00:00:00.000Z'
+        # date_from = "2024-01-18T00:00:00.000Z"
         page_size = "1500"
         url = f'https://{tenant}.emea.cumulocity.com/measurement/measurements?dateTo={date_to}&pageSize={page_size}&source={source}&dateFrom={date_from}&currentPage={api_request_page_count}'
         headers = {
@@ -41,7 +45,7 @@ for source in sources:
 
         api_request_page_count += 1
 
-    print('Source:', source)
+    print('End. Source:', source)
     print('---------------------------------------------------------------------------------------------')
     output_file_path = f'meas_json_results/{source}.json'
 
