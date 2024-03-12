@@ -5,7 +5,7 @@ from os import path, makedirs
 # Needs updating -> Error in line 27
 
 # Edit here START ------------
-sources = [('3456', '70091'), ('46964', '12485'), ('77532', '50224'), ('2636415', '12053'), ('87107442643', '63593')]
+sources = [('2483', '98681')]
 values_to_plot = [('ExternalVoltage', 'Bike voltage'),('GNSS_Status', 'GSM Status'), ('GSMSignal', 'Signal bars'), ('BatteryVoltage', 'Tracker battery voltage'), ('Battery', 'Tracker battery percent'), ('Satellites', 'Sattelite count')]
 # Edit here STOP -------------
 
@@ -30,11 +30,11 @@ for source in sources:
         # Check if the duration is less than two days
         if duration <= pd.Timedelta(days=2):
             # If duration is less than two days, use the entire duration for resampling
-            daily_average = flattened_data[f'{value_to_plot}.value'].resample('h').mean()
+            daily_average = flattened_data[f'{value_to_plot}.value'].resample('Min').mean()
         else:
             # If duration is more than two days, resample for the last two days
             last_two_days = flattened_data.last('2D')
-            daily_average = last_two_days[f'{value_to_plot}.value'].resample('h').mean()
+            daily_average = last_two_days[f'{value_to_plot}.value'].resample('Min').mean()
 
         # Plotting scatter plot
         plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')
@@ -42,7 +42,7 @@ for source in sources:
         # plt.plot(flattened_data.index.to_numpy(), flattened_data[f'{value_to_plot}.value'].to_numpy())
 
         # Set plot title and labels
-        plt.title(f'Avg. hourly {value_to_plot_name} Over Last Two days of measurements for {bike_number}')
+        plt.title(f'Avg. minutely {value_to_plot_name} Over Last Two days of measurements for {bike_number}')
         plt.xlabel('Time')
         plt.ylabel(f'{value_to_plot_name} ({unit_for_value})')
         plt.grid(True) # Enable the grid
