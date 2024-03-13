@@ -4,19 +4,23 @@ import json
 from os import path
 
 
-bikes_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
+devices_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
               17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
               70080, 96199, 14913]
 source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
-                   439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532]
+                   439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532,
+                   3482, 3241, 29139236]
 
-# No data from 01 Jan onwards: 12483 - 14912
+# No data from 01 Jan onwards: 12483 - 96168
+# Online but danger: 63589, 97405, 14913
+# No data: 72748 (Did not connect after installation)
+# No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
 # Edit here START ------------
-sources_to_make = list(range(bikes_list.index(17020), bikes_list.index(50224) + 1))
+sources_to_make = list(range(len(devices_list)))
 # Edit here STOP -------------
 
-sources = [(source_ids_list[i], bikes_list[i]) for i in sources_to_make]
+sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
 for source in sources:
     internal_id = source[0]
