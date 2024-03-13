@@ -3,23 +3,34 @@ import matplotlib.pyplot as plt
 import json
 from os import path
 
+
+bikes_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
+              17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
+              70080, 96199, 14913]
+source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
+                   439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532]
+
+# No data from 01 Jan onwards: 12483 - 14912
+
 # Edit here START ------------
-sources = [('3456', '70091'), ('46964', '12485'), ('77532', '50224'), ('2636415', '12053'), ('87107442643', '63593')]
+sources_to_make = list(range(bikes_list.index(17020), bikes_list.index(50224) + 1))
 # Edit here STOP -------------
+
+sources = [(source_ids_list[i], bikes_list[i]) for i in sources_to_make]
 
 for source in sources:
     internal_id = source[0]
     bike_number = source[1]
     all_data = []
     api_request_page_count = 1
-    meas_json_file = f'meas_json_results/{internal_id}.json'
+    meas_json_file = f'./c8y/meas_json_results/{internal_id}.json'
 
     try:
         with open(meas_json_file, 'r') as file:
             all_data = json.load(file)
     except FileNotFoundError as e:
-        print('Error accessing measurements file:', e, 'exiting...')
-        exit()
+        print('Error accessing measurements file:', e, 'moving on...')
+        continue
 
     # Flatten the nested dictionaries within the 'payload' key
     flattened_data = pd.json_normalize([item['payload'] for item in all_data])
@@ -36,6 +47,6 @@ for source in sources:
     print(bike_number)
     print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
     print('--------------------------------------------------------------------------------------------------------------------------------')
-    flattened_data.to_csv(f'meas_csv_results/{bike_number}.csv')
+    flattened_data.to_csv(f'./c8y/meas_csv_results/{bike_number}.csv')
 
     
