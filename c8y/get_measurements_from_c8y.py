@@ -2,6 +2,7 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
 
 class MaxRetriesExceededError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
@@ -16,10 +17,10 @@ load_dotenv()
 
 devices_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
               17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
-              70080, 96199, 14913, 17019, 70089]
+              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086]
 source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
                    439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532,
-                   3482, 3241, 29139236, 434557, 2508]
+                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467]
 
 # No data from 01 Jan onwards: 12483 - 96168
 # Online but danger: 63589, 97405, 14913
@@ -27,9 +28,10 @@ source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 106824
 # No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
 # Edit here START ------------
-sources_to_make = [-1] # list(range(len(devices_list)))
+sources_to_make = [devices_list.index(x) for x in [12286, 70086]]
+now = datetime.now(timezone.utc)
 tenant = "t146989263"
-date_to = '2024-03-20T00:00:00.000Z'
+date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
 date_from = "2024-02-10T00:00:00.000Z"
 page_size = "1750"
 # Edit here STOP -------------
@@ -42,7 +44,7 @@ headers = {
                 'Authorization': os.getenv('AUTH'),
             }
 
-sources = [(source_ids_list[-1], devices_list[-1])]
+sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
 no_data_found_for_time_range = []
 
