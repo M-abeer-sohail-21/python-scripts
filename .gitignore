@@ -1,7 +1,7 @@
-*.txt
-*.json
-*.csv
-*.png
-*.env
-*.zip
+*.txt*
+*.json*
+*.csv*
+*.png*
+*.env*
+*.zip*
 *ignore*

@@ -14,12 +14,22 @@ source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 106824
 # No data: 72748 (Did not connect after installation)
 # No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
-# Edit here START ------------
-sources_to_make = [devices_list.index(x) for x in [12286, 70086]]
-number_of_days = 14
-# Edit here STOP -------------
+sources_to_make = []
+
+try:
+    # Edit here START ------------
+    devices_of_interest = [12053]
+    # Edit here STOP -------------
+    sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+
+except ValueError as e:
+    print('[Error]: Device number inputted that is not there!', end=' ')
+    print(e)
+    exit()
 
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
+
+number_of_days = int(input('Enter number of days worth of data to process: '))
 
 values_to_plot = [('ExternalVoltage', 'Bike voltage'),('GNSS_Status', 'GSM Status'), ('GSMSignal', 'Signal bars'), ('BatteryVoltage', 'Tracker battery voltage'), ('Battery', 'Tracker battery percent'), ('Satellites', 'Satellite count')]
 
@@ -30,8 +40,8 @@ for source in sources:
     flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}.csv', index_col='time', low_memory=False)
     flattened_data.index = pd.to_datetime(flattened_data.index, utc=True, format='ISO8601')
 
-    print('\nBike', device_number)
-    print(flattened_data.head(2))
+    print('\nDevice', device_number)
+    print(flattened_data.head(5))
     print('--------------------------------------------------------------------------------------------------------------------------------')
 
     for value_to_plot_tuple in values_to_plot:
@@ -45,11 +55,26 @@ for source in sources:
             # Check if the duration is less than two days
             if duration <= pd.Timedelta(days=number_of_days):
                 # If duration is less than two days, use the entire duration for resampling
+                # Assuming 'number_of_days' is the number of days you want to go back from today
+
                 daily_average = flattened_data[f'{value_to_plot}.value'].resample('Min').mean()
+                
             else:
                 # If duration is more than two days, resample for the last two days
-                last_two_days = flattened_data.last(f'{number_of_days}D')
-                daily_average = last_two_days[f'{value_to_plot}.value'].resample('Min').mean()
+                # Assuming 'number_of_days' is the number of days you want to go back from today
+                cutoff_date = pd.Timestamp.now(tz= 'UTC') - pd.Timedelta(days=number_of_days)
+
+                # Filter the DataFrame to include only rows where the index (time) is greater than or equal to the cutoff date
+                last_n_days = flattened_data.loc[flattened_data.index >= cutoff_date]
+
+                daily_average = last_n_days[f'{value_to_plot}.value'].resample('Min').mean()
+
+            print(f'\nDuration for {value_to_plot}:', str(duration.days) + '. Number of days:', number_of_days)
+            print('HEAD data\n------------')
+            print(flattened_data.last(f'{number_of_days}D')[f'{value_to_plot}.value'].head(10))
+            print('TAIL data\n------------')
+            print(flattened_data.last(f'{number_of_days}D')[f'{value_to_plot}.value'].tail(10))
+            print('*' * 30)
 
             # Plotting scatter plot
             plt.scatter(daily_average.index.to_numpy(), daily_average.to_numpy(), marker='x')

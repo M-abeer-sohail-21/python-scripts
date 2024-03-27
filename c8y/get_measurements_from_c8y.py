@@ -27,12 +27,23 @@ source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 106824
 # No data: 72748 (Did not connect after installation)
 # No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
-# Edit here START ------------
-sources_to_make = [devices_list.index(x) for x in [12286, 70086]]
+sources_to_make = []
+
+try:
+    # Edit here START ------------
+    devices_of_interest = [12053]
+    # Edit here STOP -------------
+    sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+
+except ValueError as e:
+    print('[Error]: Device number inputted that is not there!', end=' ')
+    print(e)
+    exit()
+
 now = datetime.now(timezone.utc)
 tenant = "t146989263"
 date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-date_from = "2024-02-10T00:00:00.000Z"
+date_from = "2024-02-01T00:00:00.000Z"
 page_size = "1750"
 # Edit here STOP -------------
 
@@ -109,8 +120,13 @@ for source_tuple in sources:
     except KeyboardInterrupt:
         exit()
     except MaxRetriesExceededError as e:
+        print('[Error]: ', end = '')
         print(e)
     except DataVerificationError as e:
+        print('[Error]: ', end = '')
         print(e)
 
-print('No data for these devices in time range', no_data_found_for_time_range)
+if (no_data_found_for_time_range != []):
+    print('No data for these devices in time range:')
+    for device in no_data_found_for_time_range:
+        print(device)

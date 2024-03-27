@@ -15,15 +15,24 @@ source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 106824
 # No data: 72748 (Did not connect after installation)
 # No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
-# Edit here START ------------
-sources_to_make = [devices_list.index(x) for x in [12286, 70086]]
-# Edit here STOP -------------
+sources_to_make = []
+
+try:
+    # Edit here START ------------
+    devices_of_interest = [12053]
+    # Edit here STOP -------------
+    sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+
+except ValueError as e:
+    print('[Error]: Device number inputted that is not there!', end=' ')
+    print(e)
+    exit()
 
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
 for source in sources:
     internal_id = source[0]
-    bike_number = source[1]
+    device_number = source[1]
     all_data = []
     api_request_page_count = 1
     meas_json_file = f'./c8y/meas_json_results/{internal_id}.json'
@@ -46,10 +55,10 @@ for source in sources:
     flattened_data.set_index('time', inplace=True)
     flattened_data.sort_index(inplace=True)
 
-    print(internal_id)
-    print(bike_number)
+    print("ID", internal_id)
+    print("Device number", device_number)
     print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
     print('--------------------------------------------------------------------------------------------------------------------------------')
-    flattened_data.to_csv(f'./c8y/meas_csv_results/{bike_number}.csv')
+    flattened_data.to_csv(f'./c8y/meas_csv_results/{device_number}.csv')
 
     
