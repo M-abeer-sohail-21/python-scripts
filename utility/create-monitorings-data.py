@@ -5,12 +5,13 @@ all_meas = []
 results = []
 
 # ------------------------------------------------------Edit below------------------------------------------------------
-c8y_api_resp_file_prefix = "temp-remove"
-c8y_json_file_count = 4
-tenant = "t217861659"
+main_folder = "utility"
+c8y_api_resp_file_prefix = main_folder + "/raw-jsons/raw"
+c8y_json_file_count = 2
+tenant = "t160245771"
 # ------------------------------------------------------Edit above------------------------------------------------------
 
-for i in range(c8y_json_file_count):
+for i in range(1, c8y_json_file_count + 1):
     with open(f'{c8y_api_resp_file_prefix}-{i}.json') as f:
         # Load JSON data from file
         data = json.load(f)
@@ -49,5 +50,5 @@ for i in range(len(all_meas)):
 
 print('Total objects', len(results))
 print("----Writing result to file----")
-with open('result.json', 'w') as f:
+with open(main_folder + '/result.json', 'w') as f:
     json.dump(results, f, indent=2)
