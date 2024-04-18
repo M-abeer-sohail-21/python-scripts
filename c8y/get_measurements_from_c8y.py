@@ -31,7 +31,7 @@ sources_to_make = []
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12053]
+    devices_of_interest = [50221]
     # Edit here STOP -------------
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
 
@@ -43,7 +43,7 @@ except ValueError as e:
 now = datetime.now(timezone.utc)
 tenant = "t146989263"
 date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-date_from = "2024-02-01T00:00:00.000Z"
+date_from = "2023-11-01T00:00:00.000Z"
 page_size = "1750"
 # Edit here STOP -------------
 

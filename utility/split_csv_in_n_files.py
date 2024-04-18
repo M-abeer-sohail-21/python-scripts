@@ -1,7 +1,7 @@
 import csv
 import os
 
-def split_csv_file(input_file, output_dir, n):
+def split_csv_file(input_file, output_dir):
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -12,8 +12,31 @@ def split_csv_file(input_file, output_dir, n):
         header = next(reader)
         lines = list(reader)
         total_lines = len(lines)
-        lines_per_file = total_lines // n
-        
+
+        print('Total number of lines:', total_lines)
+
+        n = 0
+        ready_to_go = ''
+
+        while True:
+            n = int(input('Enter your desired value of n: '))
+
+            lines_per_file = total_lines // n
+            remaining_lines = total_lines - lines_per_file * n
+
+            print('Lines per file:', lines_per_file, 'Remaining lines:', remaining_lines)
+
+            while True:
+                ready_to_go = input('Continue? (y/n): ')
+
+                if ready_to_go not in ['y', 'n']:
+                    print('Choose from (y/n)')
+                else:
+                    break
+            
+            if ready_to_go == 'y':
+                break
+            
         for i in range(n + 1):
             output_file = os.path.join(output_dir, f'split_{i+1}.csv')
             with open(output_file, 'w', newline='') as outfile:
@@ -27,9 +50,8 @@ def split_csv_file(input_file, output_dir, n):
                     end_index = (i +  1) * lines_per_file
                 for line in lines[start_index:end_index]:
                     writer.writerow(line)
-
-# Example usage
-input_file = '/home/sarwan/Downloads/salesforce_analytics_hourly.csv'
-output_dir = '/home/sarwan/Downloads/salesforce_analytics_hourly_split_csv_files'
-n =  5  # Number of files to split into
-split_csv_file(input_file, output_dir, n)
+# -------------------------------------- START to edit here -----------------------------------------------
+input_file = '/home/sarwan/Downloads/salesforce-analytics-dump.csv'
+output_dir = '/home/sarwan/Downloads/salesforce-analytics-hourly-split-csv'
+# -------------------------------------------- END --------------------------------------------------------
+split_csv_file(input_file, output_dir)
