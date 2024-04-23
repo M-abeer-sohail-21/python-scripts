@@ -2,6 +2,8 @@ from os import listdir
 from json import loads, dumps, load
 import jsonpath_ng
 
+# NEEDS MORE WORK!
+
 folder_path = 'abds-manual-data-logs' # Edit here
 device_ids = """866907053430095
 866907055235765

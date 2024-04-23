@@ -19,9 +19,6 @@ df = json_normalize(data)
 
 df['bike_number'] = df['name'].str.extract(r'\b(\d{5})\b', expand=False)
 
-# print(df[['bike_number','internalId']])
-# print(list(df['bike_number']))
-# print(list(df['internalId']))
 print(
     list(
         map(

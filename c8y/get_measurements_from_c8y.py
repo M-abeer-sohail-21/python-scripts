@@ -36,7 +36,7 @@ try:
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
 
 except ValueError as e:
-    print('[Error]: Device number inputted that is not there!', end=' ')
+    print('[Error]: Device number not found!', end=' ')
     print(e)
     exit()
 
