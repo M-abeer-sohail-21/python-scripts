@@ -22,13 +22,13 @@ async def publish_messages(client, client_id, topic, delay, msg_count, start):
      
 
        await client.publish(topic, payload=message)
-       print(f"{get_current_time_utc()}: Published message number {i} for client {client_id} on topic: {topic}")
+       print(f"{get_current_time_utc()}: Published message number {i} for client {client_id} on topic: {topic}\n\tExpect next message in {actual_delay} s.")
        await asyncio.sleep(actual_delay)
 
 def get_int_value(input_msg, min, max):
    return_val = 0
    while True:
-       return_val = int(input(input_msg))
+       return_val = int(input(input_msg + " "))
        if return_val in range(min, max + 1):
            break
        else:
@@ -36,37 +36,37 @@ def get_int_value(input_msg, min, max):
    return return_val
 
 def get_total_clients():
-   return get_int_value('\nEnter total number of clients: ', 1, 10)
+   return get_int_value('\nEnter total number of clients:', 1, 10)
 
 def get_total_msg_count():
-   return get_int_value('Enter total msg count per client: ', 2, 10)
+   return get_int_value('Enter total msg count per client:', 2, 10)
 
 async def main():
-   try:
-       broker = "mqtt-listeners.xelerate.solutions"
-       base_topic = "testing/topic/"
+    broker = 'mqtt-listeners-azure.xelerate.solutions'
+    base_topic = "testing/topic/"
 
-       total_clients = get_total_clients()
-       msg_count = get_total_msg_count()
-       delay = get_int_value('Enter base delay value', 5, 60)
+    total_clients = get_total_clients()
+    msg_count = get_total_msg_count()
+    delay = get_int_value('Enter base delay value (s):', 5, 60)
 
-       client_ids = [f"script-test-Pub-{str(x).zfill(2)}" for x in range(total_clients)]
-       topics = [f"{base_topic}{str(x).zfill(2)}" for x in range(total_clients)]
+    client_ids = [f"script-test-Pub-{str(x).zfill(2)}" for x in range(total_clients)]
+    topics = [f"{base_topic}{str(x).zfill(2)}" for x in range(total_clients)]
 
-       username = "delete-me-01"
-       password = "ProbabyMAN767e4!"       
+    username = "testing-02"
+    password = "ProbabyMAN767e4!"       
 
-       tasks = []       
+    tasks = []       
 
-       for i in range(total_clients):
-           start = get_int_value(f'Enter a starting value for {client_ids[i]}: ', 0, 99999999)
-           client = aiomqtt.Client(broker, client_id=client_ids[i], username=username, password=password)
-           task = publish_messages(client, client_ids[i], topics[i], delay, msg_count, start)
-           tasks.append(task)
+    for i in range(total_clients):
+        start = get_int_value(f'Enter a starting value for {client_ids[i]}:', 0, 99999999)
+        client = aiomqtt.Client(broker, client_id=client_ids[i], username=username, password=password)
+        task = publish_messages(client, client_ids[i], topics[i], delay, msg_count, start)
+        tasks.append(task)
 
-       await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
 
-   except KeyboardInterrupt:
+   
+try:
+    asyncio.run(main())
+except KeyboardInterrupt:
        print('Bye bye...')
-
-asyncio.run(main())

@@ -19,10 +19,8 @@ df = json_normalize(data)
 
 df['bike_number'] = df['name'].str.extract(r'\b(\d{5})\b', expand=False)
 
-print(
-    list(
+list(
         map(
-            lambda x:list(df[x]), ['bike_number', 'internalId']
+            lambda x: print(list(df[x].sort_values())), ['bike_number', 'internalId']
         )
-    )
 )

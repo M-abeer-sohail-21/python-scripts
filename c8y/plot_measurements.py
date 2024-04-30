@@ -4,10 +4,10 @@ from os import path, makedirs
 
 devices_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
               17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
-              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086, 50241, 12115, 10620, 10622, 10617, 12495, 14779, 72759]
+              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086, 50241, 12115, 10620, 10622, 10617, 12495, 14779, 72759, 12486]
 source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
                    439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532,
-                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467, 63055, 66930, 73289, 69952, 74249, 152454, 3953908687, 51107442290]
+                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467, 63055, 66930, 73289, 69952, 74249, 152454, 3953908687, 51107442290, 2530]
 
 # No data from 01 Jan onwards: 12483 - 96168
 # Online but danger: 63589, 97405, 14913
@@ -18,7 +18,7 @@ sources_to_make = []
 
 try:
     # Edit here START ------------
-    devices_of_interest = [10617, 10620, 10622, 12115, 12495, 14779, 50241, 72759]
+    devices_of_interest = [12486, 12495, 14779, 50241, 72759]
     # Edit here STOP -------------
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
 
@@ -27,6 +27,8 @@ except ValueError as e:
     print(e)
     exit()
 
+dont_skip = False
+
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
 number_of_days = int(input('Enter number of days worth of data to process: '))
@@ -34,13 +36,17 @@ number_of_days = int(input('Enter number of days worth of data to process: '))
 values_to_plot = [('ExternalVoltage', 'Bike voltage'),('GNSS_Status', 'GSM Status'), ('GSMSignal', 'Signal bars'), ('BatteryVoltage', 'Tracker battery voltage'), ('Battery', 'Tracker battery percent'), ('Satellites', 'Satellite count'), ('UnplugDetection', 'Unplug Alert')]
 
 for source in sources:
+    if not dont_skip:
+        result = input('Press enter to continue, type skip to skip this message...')
+        if result == "skip":
+            dont_skip = True
+    
     internal_id = source[0]
     device_number = source[1]
 
     flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}.csv', index_col='time', low_memory=False)
     flattened_data.index = pd.to_datetime(flattened_data.index, utc=True, format='ISO8601')
 
-    print('\nDevice', device_number)
     print(flattened_data.head(5))
     print('--------------------------------------------------------------------------------------------------------------------------------')
 
@@ -72,9 +78,9 @@ for source in sources:
                 daily_average = last_n_days[f'{value_to_plot}.value'].resample('Min').mean()
 
             print(f'\nDuration for {value_to_plot}:', str(duration.days) + '. Number of days:', number_of_days)
-            print('HEAD data\n------------')
+            print(f'HEAD data, device number {device_number}\n------------')
             print(flattened_data.last(f'{number_of_days}D')[f'{value_to_plot}.value'].head(10))
-            print('TAIL data\n------------')
+            print(f'TAIL data, device number {device_number}\n------------\n')
             print(flattened_data.last(f'{number_of_days}D')[f'{value_to_plot}.value'].tail(10))
             print('*' * 30)
 

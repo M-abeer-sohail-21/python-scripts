@@ -22,9 +22,9 @@ def on_disconnect(client, userdata, rc):
     else:
         print(f"{get_current_time_utc()}: Unexpected disconnection, result code {str(rc)}\n")
 
-topics = ['/gw/acrelHW/+/data/+'] # ["/server/acrelHW/#", "/gw/acrelHW/#"]
-broker_url = "broker.xelerate.solutions"
-username = "delete-me-01"
+topics = ['testing/topic/+'] # ["/server/acrelHW/#", "/gw/acrelHW/#"]
+broker_url = "mqtt-listeners-azure.xelerate.solutions"
+username = "testing-01"
 password = "ProbabyMAN767e4!"
 
 client = mqtt.Client(client_id="script-test-Sub-" + str(randint(100, 999)))

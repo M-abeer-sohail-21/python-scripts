@@ -68,22 +68,24 @@ def filter_columns(col_names, condition=None, print_output=False):
 
 base_path = '/home/sarwan/Downloads'
 
-number_of_files = 1
+number_of_files = 2
+
+temp_prefix = ['c8y', 'bridge']
 
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/all-rensair-license-devices.json'
-    output_path = f'{base_path}/all-air-purifier-devices.csv'
+    input_path = f'{base_path}/temp-abds-{temp_prefix[i - 1]}.json'
+    output_path = f'{base_path}/abds-{temp_prefix[i - 1]}-offline.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
 
     df = json_normalize(data)
 
-    rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
+    # rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
 
-    replace_substring_from_columns("packetFromPlatform.", "")
-    replace_substring_from_columns("c8y_Mobile.", "")
-    replace_substring_from_columns("c8y_Hardware.", "")
+    # replace_substring_from_columns("packetFromPlatform.", "")
+    # replace_substring_from_columns("c8y_Mobile.", "")
+    # replace_substring_from_columns("c8y_Hardware.", "")
 
     # condition = df['iccid'].notnull() & df['iccid'].ne('')
 

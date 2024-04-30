@@ -8,14 +8,11 @@ import os
 def get_current_time_utc():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-usernames = ['abeer_client', "delete-me-01"]
-pwords = ['12345abcde', "12345abcde"]
-urls = ['broker.xelerate.solutions', 'mqtt-listeners.xelerate.solutions']
+usernames = ['testing-01']
+pwords = ['ProbabyMAN767e4!']
+urls = ['mqtt-listeners-azure.xelerate.solutions']
 
-while True:
-   ind = 1 # int(input('Enter index (0 or 1): '))
-   if ind in [0,1]:
-      break
+ind = 0
 
 while True:
    total_msg_count = int(input('Enter number of messages (5 to 1000): '))

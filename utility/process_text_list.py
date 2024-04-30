@@ -1,4 +1,3 @@
-from ignore_constants import email_list
 from re import findall
 import pandas as pd
 
@@ -14,6 +13,9 @@ def find_matches(my_string, pattern):
         return match
     else:
         return None
+
+with open('/home/sarwan/work/emails-temp/0-email-list.txt', 'r') as f:
+    email_list = f.read().split('\n')[:-1]
 
 for name in email_list:
     split_names = name.split(' - ')
