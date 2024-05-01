@@ -23,7 +23,7 @@ def on_disconnect(client, userdata, rc):
         print(f"{get_current_time_utc()}: Unexpected disconnection, result code {str(rc)}\n")
 
 topics = ['testing/topic/+'] # ["/server/acrelHW/#", "/gw/acrelHW/#"]
-broker_url = "mqtt-listeners-azure.xelerate.solutions"
+broker_url = "broker.xelerate.solutions" # mqtt-listeners-azure.xelerate.solutions 
 username = "testing-01"
 password = "ProbabyMAN767e4!"
 
@@ -40,4 +40,5 @@ client.connect(broker_url, 1883, 300)
 try:
     client.loop_forever()
 except KeyboardInterrupt:
+    client.disconnect()
     print('Ending sub loop.\n')
