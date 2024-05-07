@@ -6,6 +6,10 @@ all_records = []
 patterns = [r'\b\d{12,22}\b', r'\b\d{5}\b', r'\d+$']
 device_specific_number = 'bike_number'
 
+base_path = '/home/sarwan/Downloads/temp'
+file_path = 'emails-to-process/email-list.txt'
+identifier_substring = 'Xelerate Rule'
+
 def find_matches(my_string, pattern):
 
     match = findall(pattern, my_string)
@@ -14,11 +18,15 @@ def find_matches(my_string, pattern):
     else:
         return None
 
-with open('/home/sarwan/work/emails-temp/0-email-list.txt', 'r') as f:
-    email_list = f.read().split('\n')[:-1]
+with open(f'{base_path}/{file_path}', 'r') as f:
+    text_list = f.read().split('\n')[:-1]
 
-for name in email_list:
-    split_names = name.split(' - ')
+for line in text_list:
+
+    if identifier_substring not in line:
+        continue
+
+    split_names = line.split(' - ')
 
     alarm_name = split_names[1]
     device_name = split_names[3]
@@ -48,5 +56,4 @@ for name in email_list:
     all_records.append(temp_dict)
 
 df = pd.DataFrame(all_records)
-base_path = '/home/sarwan/Downloads'
-df.to_csv(f'{base_path}/alarms_csv.csv', index=False)
+df.to_csv(f'{base_path}/abds_alarms_csv.csv', index=False)

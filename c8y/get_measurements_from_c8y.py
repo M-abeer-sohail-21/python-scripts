@@ -17,10 +17,24 @@ load_dotenv()
 
 devices_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
               17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
-              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086, 50241, 12115, 10620, 10622, 10617, 12495, 14779, 72759, 12486]
+              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086, 50241, 12115, 10620, 10622, 10617, 12495, 14779, 72759, 12486, 12291,
+12482,
+14773,
+70080,
+70081,
+70091,
+72743,
+96201, 12490, 35759]
 source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
                    439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532,
-                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467, 63055, 66930, 73289, 69952, 74249, 152454, 3953908687, 51107442290, 2530]
+                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467, 63055, 66930, 73289, 69952, 74249, 152454, 3953908687, 51107442290, 2530,49492,
+47718,
+6253904087,
+3482,
+48727,
+3456,
+31114007536,
+389, 393621, 11127894796]
 
 # No data from 01 Jan onwards: 12483 - 96168
 # Online but danger: 63589, 97405, 14913
@@ -28,26 +42,39 @@ source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 106824
 # No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
 
 sources_to_make = []
+tenant = "t146989263"
+page_size = "1750"
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12486]
-    # Edit here STOP -------------
+    devices_of_interest = [12483, 14787, 14912, 50221, 50224, 63593, 70079, 72748, 96168, 98681] # [12490, 12291, 12482, 14773, 70080, 70081, 70091, 72743, 96201, 10617, 10620, 10622, 12495, 14779, 50241, 72759, 12115, 12486, 12286, 70086, 10616, 12287, 72763, 70089, 63589, 12053, 12108, 12485, 12483, 14787, 14912, 14913, 50221, 70091, 50224, 63593, 70079, 72748, 96199, 96168, 97405, 98681, 35759]
+    
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+
+    while True:
+        enable_time_frame = input('A time frame is set? (y/n) ')
+        if enable_time_frame in ['yes', 'no', 'y', 'n']:
+            if enable_time_frame in ['yes', 'y']:
+                enable_time_frame = True
+            else:
+                enable_time_frame = False
+            break
 
 except ValueError as e:
     print('[Error]: Device number not found!', end=' ')
     print(e)
     exit()
 
-now = datetime.now(timezone.utc)
-tenant = "t146989263"
-date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-date_from = "2023-11-01T00:00:00.000Z"
-page_size = "1750"
+if enable_time_frame:
+    days_to_go_back = int(input('Enter number of days to go back: '))
+    now = datetime.now(timezone.utc)
+    date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    date_from = (now - timedelta(days=days_to_go_back)).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+    print(f'Date to: {date_to}, date from: {date_from}\n')
 # Edit here STOP -------------
 
-base_url = f'https://{tenant}.emea.cumulocity.com/inventory/managedObjects'
+managed_obj_url = f'https://{tenant}.emea.cumulocity.com/inventory/managedObjects'
 measurements_url = f'https://{tenant}.emea.cumulocity.com/measurement/measurements'
 headers = {
                 'User-Agent': 'my-app/0.0.1',
@@ -70,16 +97,21 @@ for source_tuple in sources:
         all_data = []
         api_request_page_count = 1
 
-        managed_objects_url = f'{base_url}/{source}'
+        managed_objects_url = f'{managed_obj_url}/{source}'
 
         response = requests.get(url=managed_objects_url, headers=headers)
         device_name = json.loads(response.text)['name']
         print(f'Device name: {device_name}, device number: {device_number}')
         if str(device_number) not in device_name:
+            no_data_found_for_time_range.append(device_number)
             raise DataVerificationError(f'Device number and name mismatch! Device: {device_number}, Name: {device_name}')
 
         while True:
-                params = {'dateTo': date_to, 'dateFrom': date_from, 'source': source, 'pageSize': page_size, 'currentPage': api_request_page_count}
+                params = {'source': source, 'pageSize': page_size, 'currentPage': api_request_page_count}
+
+                if enable_time_frame:
+                    params['dateTo'] = date_to
+                    params['dateFrom'] = date_from
 
                 print(f'{api_request_page_count}: Making request for {device_number} : {source}', end='')
 
@@ -99,7 +131,11 @@ for source_tuple in sources:
 
                     data_list = []
                     for item in data['measurements']:
-                        data_list.extend(item['modifiedMeasurements'])
+                        type_measurement = item['type']
+                        if type_measurement == 'measurements':
+                            data_list.append({'payload': item[type_measurement], 'time': item['time']})
+                        elif type_measurement == 'modifiedMeasurements':
+                            data_list.extend(item[type_measurement])
                     all_data.extend(data_list)
                 
                     api_request_page_count += 1
@@ -122,9 +158,11 @@ for source_tuple in sources:
     except MaxRetriesExceededError as e:
         print('[Error]: ', end = '')
         print(e)
+        no_data_found_for_time_range.append(device_number)
     except DataVerificationError as e:
         print('[Error]: ', end = '')
         print(e)
+        no_data_found_for_time_range.append(device_number)
 
 if (no_data_found_for_time_range != []):
     print('No data for these devices in time range:')

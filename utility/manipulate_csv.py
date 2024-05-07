@@ -1,6 +1,7 @@
 from pandas import read_csv, json_normalize, to_datetime, notnull
 from csv import reader
 from json import load
+from re import search
 
 def delete_columns(col):
     global df
@@ -32,12 +33,12 @@ def generate_dict(input_file_path, int_key = False):
         
         return my_dict
 
-def convert_epoch_to_iso(column_name, unit='s'):
+def convert_epoch_to_iso(column_name, new_column_name, unit='s'):
     global df
     # Convert epoch time to datetime, handling errors by coercing invalid values
-    df['time'] = to_datetime(df[column_name], unit=unit, errors='coerce')
+    df['new_column_name'] = to_datetime(df[column_name], unit=unit, errors='coerce')
     # Convert datetime to ISO format
-    df['time'] = df['time'].apply(lambda x: x.isoformat() if notnull(x) else None)
+    df['new_column_name'] = df['new_column_name'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat() if notnull(x) else None)
 
 def replace_substring_from_columns(substring, to_replace_with):
     global df
@@ -65,21 +66,35 @@ def filter_columns(col_names, condition=None, print_output=False):
     
     return result
         
+def extract_substring(text, pattern):
+    match = search(pattern, text)
+    if match:
+        return match.group(1)  # Assuming you want the first group; adjust the group number as needed
+    else:
+        return None
 
-base_path = '/home/sarwan/Downloads'
+base_path = '/home/sarwan/Downloads/temp'
 
 number_of_files = 2
 
-temp_prefix = ['c8y', 'bridge']
+temp_suffix = ['']
 
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/temp-abds-{temp_prefix[i - 1]}.json'
-    output_path = f'{base_path}/abds-{temp_prefix[i - 1]}-offline.csv'
+    input_path = f'{base_path}/abds-offline-devices.json' # -{temp_suffix[i - 1]}
+    output_path = f'{base_path}/abds-offline.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
 
     df = json_normalize(data)
+
+    df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+    df['updatedAt'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    df['updatedAt'] = df['updatedAt'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+
+    replace_substring_from_columns('$date.$numberLong','unix')
+    replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    rearrange_columns(['bike_number', 'name','imei','iccid', 'updatedAt', 'updatedAt.unix'])
 
     # rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
 
