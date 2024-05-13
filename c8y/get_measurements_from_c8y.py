@@ -3,7 +3,6 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
-
 class MaxRetriesExceededError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
     pass
@@ -12,34 +11,21 @@ class DataVerificationError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
     pass
 
+def try_except(func):
+    try:
+        func()
+        return False
+    except Exception as e:
+        print('[Error]: try_except: caught error:',e)
+        return True
 
 load_dotenv()
 
-devices_list = [63589, 70091, 63593, 12053, 12485, 12483, 70079, 17018, 14912, 
-              17020, 50221, 96168, 98681, 14787, 97405, 12108, 72748, 50224, 
-              70080, 96199, 14913, 17019, 70089, 12287, 72763, 10616, 12286, 70086, 50241, 12115, 10620, 10622, 10617, 12495, 14779, 72759, 12486, 12291,
-12482,
-14773,
-70080,
-70081,
-70091,
-72743,
-96201, 12490, 35759]
-source_ids_list = [47107417697, 3456, 87107442643, 2636415, 46964, 47674, 1068248, 2002381, 26637896,
-                   439804, 1422168, 3420, 2483, 34695733, 49237155, 69305, 60107407843, 77532,
-                   3482, 3241, 29139236, 434557, 2508, 61683, 37107398393, 1053103, 388751, 3467, 63055, 66930, 73289, 69952, 74249, 152454, 3953908687, 51107442290, 2530,49492,
-47718,
-6253904087,
-3482,
-48727,
-3456,
-31114007536,
-389, 393621, 11127894796]
+# NO DATA FOR THESE (as of 2024-05-13): 63593,14787,14912,70079,72748,96168
 
-# No data from 01 Jan onwards: 12483 - 96168
-# Online but danger: 63589, 97405, 14913
-# No data: 72748 (Did not connect after installation)
-# No data on c8y: 12483, 70079, 17018, 14912, 17020, 96168
+devices_list=[63589,70091,63593,12053,12485,12483,70079,17018,14912,17020,50221,96168,98681,14787,97405,12108,72748,50224,70080,96199,14913,17019,70089,12287,72763,10616,12286,70086,50241,12115,10620,10622,10617,12495,14779,72759,12486,12291,12482,14773,70080,70081,70091,72743,96201,12490,35759,10614,10619,10372]
+
+source_ids_list=[47107417697,3456,87107442643,2636415,46964,47674,1068248,2002381,26637896,439804,1422168,3420,2483,34695733,49237155,69305,60107407843,77532,3482,3241,29139236,434557,2508,61683,37107398393,1053103,388751,3467,63055,66930,73289,69952,74249,152454,3953908687,51107442290,2530,49492,47718,6253904087,3482,48727,3456,31114007536,389,393621,11127894796,1049556,70048,1128729]
 
 sources_to_make = []
 tenant = "t146989263"
@@ -47,8 +33,13 @@ page_size = "1750"
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12483, 14787, 14912, 50221, 50224, 63593, 70079, 72748, 96168, 98681] # [12490, 12291, 12482, 14773, 70080, 70081, 70091, 72743, 96201, 10617, 10620, 10622, 12495, 14779, 50241, 72759, 12115, 12486, 12286, 70086, 10616, 12287, 72763, 70089, 63589, 12053, 12108, 12485, 12483, 14787, 14912, 14913, 50221, 70091, 50224, 63593, 70079, 72748, 96199, 96168, 97405, 98681, 35759]
+    devices_of_interest = [10614, 10372, 10619, 12490, 12291, 12482, 14773, 70080, 70081, 70091, 72743, 96201, 10617, 12495, 14779, 72759, 10620, 10622, 50241, 12486, 12115, 35759, 12286, 70086, 12287, 72763, 10616, 70089, 63589, 12053, 12108, 14913, 63593, 97405, 14787, 50224, 70091, 96199, 12483, 14912, 50221, 70079, 72748, 96168, 98681, 12485]
     
+    not_found_devices = [x for x in devices_of_interest if try_except(lambda x=x,y=devices_list,z=source_ids_list: z[y.index(x)])]
+
+    if len(not_found_devices) != 0:
+        raise ValueError(f'Source IDs for these device numbers not found! {not_found_devices}')
+
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
 
     while True:
@@ -89,11 +80,12 @@ no_data_found_for_time_range = []
 repeat_counter = 0
 repeat_until_count = 10
 
+total_devices_count = len(sources)
 
-for source_tuple in sources:
+for i in range(total_devices_count):
     try:
-        source = source_tuple[0]
-        device_number = source_tuple[1]
+        source = sources[i][0]
+        device_number = sources[i][1]
         all_data = []
         api_request_page_count = 1
 
@@ -101,6 +93,8 @@ for source_tuple in sources:
 
         response = requests.get(url=managed_objects_url, headers=headers)
         device_name = json.loads(response.text)['name']
+
+        print(f'Processing device {i+1} of {total_devices_count}')
         print(f'Device name: {device_name}, device number: {device_number}')
         if str(device_number) not in device_name:
             no_data_found_for_time_range.append(device_number)
