@@ -3,6 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
+from get_days_of_data_reporting import get_days_of_data_reporting
 class MaxRetriesExceededError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
     pass
@@ -21,15 +22,15 @@ def try_except(func):
 
 load_dotenv()
 
-# NO DATA FOR THESE (as of 2024-05-13): 63593,14787,14912,70079,72748,96168
-
-devices_list=[63589,70091,63593,12053,12485,12483,70079,17018,14912,17020,50221,96168,98681,14787,97405,12108,72748,50224,70080,96199,14913,17019,70089,12287,72763,10616,12286,70086,50241,12115,10620,10622,10617,12495,14779,72759,12486,12291,12482,14773,70080,70081,70091,72743,96201,12490,35759,10614,10619,10372]
-
-source_ids_list=[47107417697,3456,87107442643,2636415,46964,47674,1068248,2002381,26637896,439804,1422168,3420,2483,34695733,49237155,69305,60107407843,77532,3482,3241,29139236,434557,2508,61683,37107398393,1053103,388751,3467,63055,66930,73289,69952,74249,152454,3953908687,51107442290,2530,49492,47718,6253904087,3482,48727,3456,31114007536,389,393621,11127894796,1049556,70048,1128729]
-
 sources_to_make = []
 tenant = "t146989263"
 page_size = "1750"
+
+# NO DATA FOR THESE (as of 2024-05-13): 63593,14787,14912,70079,72748,96168
+
+devices_list= [63589,70091,63593,12053,12485,12483,70079,17018,14912,17020,50221,96168,98681,14787,97405,12108,72748,50224,70080,96199,14913,17019,70089,12287,72763,10616,12286,70086,50241,12115,10620,10622,10617,12495,14779,72759,12486,12291,12482,14773,70080,70081,70091,72743,96201,12490,35759,10614,10619,10372]
+
+source_ids_list=[47107417697,3456,87107442643,2636415,46964,47674,1068248,2002381,26637896,439804,1422168,3420,2483,34695733,49237155,69305,60107407843,77532,3482,3241,29139236,434557,2508,61683,37107398393,1053103,388751,3467,63055,66930,73289,69952,74249,152454,3953908687,51107442290,2530,49492,47718,6253904087,3482,48727,3456,31114007536,389,393621,11127894796,1049556,70048,1128729]
 
 try:
     # Edit here START ------------
@@ -75,7 +76,7 @@ headers = {
 
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
-no_data_found_for_time_range = []
+devices_no_data = []
 
 repeat_counter = 0
 repeat_until_count = 10
@@ -97,7 +98,7 @@ for i in range(total_devices_count):
         print(f'Processing device {i+1} of {total_devices_count}')
         print(f'Device name: {device_name}, device number: {device_number}')
         if str(device_number) not in device_name:
-            no_data_found_for_time_range.append(device_number)
+            devices_no_data.append(device_number)
             raise DataVerificationError(f'Device number and name mismatch! Device: {device_number}, Name: {device_name}')
 
         while True:
@@ -120,7 +121,7 @@ for i in range(total_devices_count):
                     if len(data['measurements']) == 0:
                         if api_request_page_count == 1:
                             print('No data found in date range for device number', str(device_number) + ',', 'source:', source)
-                            no_data_found_for_time_range.append((device_number, source))
+                            devices_no_data.append((device_number, source))
                         break
 
                     data_list = []
@@ -152,13 +153,13 @@ for i in range(total_devices_count):
     except MaxRetriesExceededError as e:
         print('[Error]: ', end = '')
         print(e)
-        no_data_found_for_time_range.append(device_number)
+        devices_no_data.append(device_number)
     except DataVerificationError as e:
         print('[Error]: ', end = '')
         print(e)
-        no_data_found_for_time_range.append(device_number)
+        devices_no_data.append(device_number)
 
-if (no_data_found_for_time_range != []):
+if (devices_no_data != []):
     print('No data for these devices in time range:')
-    for device in no_data_found_for_time_range:
+    for device in devices_no_data:
         print(device)
