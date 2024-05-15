@@ -2,8 +2,8 @@ import pandas as pd
 from datetime import timedelta
 
 # Edit here START ------------
-devices_of_interest = [10614, 10372, 10619, 12490, 12291, 12482, 14773, 70080, 70081, 70091, 72743, 96201, 10617, 12495, 14779, 72759, 10620, 10622, 50241, 12486, 12115, 35759, 12286, 70086, 12287, 72763, 10616, 70089, 63589, 12053, 12108, 14913, 63593, 97405, 14787, 50224, 96199, 12483, 14912, 50221, 70079, 72748, 96168, 98681, 12485]
-devices_no_data = [63593,14787,14912,70079,72748,96168]
+devices_of_interest = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 12286, 10614, 10616, 70079, 10372, 50221, 12053, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912]
+devices_with_no_data = [63593,14787,14912,70079,72748,96168]
 # Edit here STOP -------------
 
 def get_days_of_data_reporting(device_number):
@@ -56,7 +56,7 @@ def get_days_of_data_reporting(device_number):
     
     print(f'Last date in range: {sorted_dates[-1]}')
 
-devices_with_data = sorted(list(set(devices_of_interest) - set(devices_no_data)))
+devices_with_data = sorted(list(set(devices_of_interest) - set(devices_with_no_data)))
 
 print('\nDays of data reporting:')
 print('************************')
