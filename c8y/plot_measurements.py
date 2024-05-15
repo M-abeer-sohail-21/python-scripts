@@ -6,16 +6,15 @@ from os import path, makedirs
 
 # NO DATA FOR THESE (as of 2024-05-13): 63593,14787,14912,70079,72748,96168
 
-devices_list = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 12286, 10614, 10616, 70079, 10372, 50221, 12053, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912]
+devices_list = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 12286, 10614, 10616, 70079, 10372, 50221, 12053, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12115, 12486, 12490, 63589, 70086, 72759, 72763, 96199, 97405]
 
-source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896]
+source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155]
 
 devices_with_no_data = [63593,14787,14912,70079,72748,96168]
 
 try:
     # Edit here START ------------
     devices_of_interest = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 12286, 10614, 10616, 70079, 10372, 50221, 12053, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912]
-
     # Edit here STOP -------------
     
     devices_of_interest = list(set(devices_of_interest) - set(devices_with_no_data))
@@ -50,6 +49,11 @@ for source in sources:
     flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}.csv', index_col='time', low_memory=False)
     flattened_data.index = pd.to_datetime(flattened_data.index, utc=True, format='ISO8601')
 
+    duration = flattened_data.index.max() - flattened_data.index.min()
+
+    print(f'duration: {flattened_data.index.max()} to {flattened_data.index.min()}')
+    print('Number of days:', duration.days)
+
     print(flattened_data.head(5))
     print('--------------------------------------------------------------------------------------------------------------------------------')
 
@@ -57,13 +61,7 @@ for source in sources:
         try:
             value_to_plot = value_to_plot_tuple[0]
             value_to_plot_name = value_to_plot_tuple[1]
-            unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]
-
-            duration = flattened_data.index.max() - flattened_data.index.min()
-
-            print(f'duration: {flattened_data.index.max()} to {flattened_data.index.min()}')
-            print('Number of days:', duration.days)
-            
+            unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]            
 
             print(f'Processing {value_to_plot} for device {device_number}')
             print('*' * 30)
@@ -104,12 +102,12 @@ for source in sources:
 
             # Optionally close the plot window
             plt.close()
-
-            print(f'Processed device {count} of {num_of_sources}')
-            count += 1
         
         except KeyError as e:
             print(f'Ran into an error, key not found: {e}')
 
         except Exception as e:
             print(f'Ran into an error while plotting data for {device_number}: {e}')
+    
+    print(f'Processed device {count} of {num_of_sources}')
+    count += 1
