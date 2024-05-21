@@ -1,14 +1,15 @@
 import json
 from dateutil.parser import parse
+from time import sleep
 
 all_meas = []
 results = []
 
 # ------------------------------------------------------Edit below------------------------------------------------------
 main_folder = "utility"
-c8y_api_resp_file_prefix = main_folder + "/raw-jsons/raw"
-c8y_json_file_count = 2
-tenant = "t160245771"
+c8y_api_resp_file_prefix = main_folder + "/raw-meas-jsons/raw"
+c8y_json_file_count = 3
+tenant = "t146989263"
 # ------------------------------------------------------Edit above------------------------------------------------------
 
 for i in range(1, c8y_json_file_count + 1):
@@ -18,8 +19,13 @@ for i in range(1, c8y_json_file_count + 1):
         # Now data is a Python dictionary
         all_meas.extend(data['measurements'])
 
-for i in range(len(all_meas)):
-    print(f"Object ID: {i}\n")
+print('Processing...\n')
+sleep(2)
+
+total_count = len(all_meas)
+
+for i in range(total_count):
+    print(f"...object ID: {i + 1} of {total_count}")
     test_obj = all_meas[i]
     time_in_sec = int(parse(test_obj['time']).timestamp() * 1000)
 
@@ -31,7 +37,7 @@ for i in range(len(all_meas)):
         }, "sensorId": test_obj['source']['id'],
         "type": test_obj['type'],
         "tenant": tenant,
-        "reading": test_obj.get('ping') or test_obj.get('measurements')  or test_obj.get('data') or test_obj.get('converged_measurements'),
+        "reading": test_obj.get(test_obj.get('type')),
         "createdAt": {
             "$date": {
                 "$numberLong": str(time_in_sec)
@@ -48,7 +54,8 @@ for i in range(len(all_meas)):
 
     results.append(new_json)
 
-print('Total objects', len(results))
-print("----Writing result to file----")
+print('Tenant:', tenant)
+print('Total event objects processed:', len(results))
+print("Writing result to file...")
 with open(main_folder + '/result.json', 'w') as f:
     json.dump(results, f, indent=2)
