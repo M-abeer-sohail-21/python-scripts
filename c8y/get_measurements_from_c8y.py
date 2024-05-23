@@ -36,9 +36,12 @@ source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492
 
 devices_with_no_data = [63593,14787,14912,70079,72748,96168]
 
+auth_token = ''
+
 try:
     # Edit here START ------------
     devices_of_interest = [12112]
+    auth_token = os.getenv('C8Y_ABDS_AUTH')
     # Edit here STOP -------------
 
     devices_of_interest = list(set(devices_of_interest) - set(devices_with_no_data))
@@ -78,7 +81,7 @@ measurements_url = f'https://{tenant}.emea.cumulocity.com/measurement/measuremen
 headers = {
                 'User-Agent': 'my-app/0.0.1',
                 'Accept': 'application/json',
-                'Authorization': os.getenv('AUTH'),
+                'Authorization': auth_token,
             }
 
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]

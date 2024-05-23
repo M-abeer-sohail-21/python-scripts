@@ -8,8 +8,8 @@ results = []
 # ------------------------------------------------------Edit below------------------------------------------------------
 main_folder = "utility"
 c8y_api_resp_file_prefix = main_folder + "/raw-meas-jsons/raw"
-c8y_json_file_count = 3
-tenant = "t146989263"
+c8y_json_file_count = 2
+tenant = "t217861659"
 # ------------------------------------------------------Edit above------------------------------------------------------
 
 for i in range(1, c8y_json_file_count + 1):
