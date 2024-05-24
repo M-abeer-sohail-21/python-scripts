@@ -8,7 +8,8 @@ load_dotenv()
 
 tenant_token_map = {
     "t1210372600": 'C8Y_E2E_TOKEN',
-    "t217861659": "C8Y_RENSAIR_TOKEN"
+    "t217861659": "C8Y_RENSAIR_TOKEN",
+    "t160245771": "C8Y_ORANO_TOKEN"
 }
 all_data = []
 
@@ -17,9 +18,10 @@ all_data = []
 endpoint = 'wslistener/populateData'
 backend = 'k8s-e2e-backend.xelerate.solutions'
 base_path = './utility'
-file_path = 'raw_c8y_measurements_to_send_to_wslistener/raw'
+file_path = 'raw_c8y_measurements_to_send_to_wslistener'
 tenant = "t217861659"
-no_of_files = 2
+no_of_files = 1
+prefix = "orano"
 
 # Edit here STOP -----------------------------------
 
@@ -35,7 +37,7 @@ full_url = f'https://{backend}/{endpoint}'
 print('URL to send at:', full_url,'\n')
 
 for i in range(1 , no_of_files + 1):
-    full_file_path = f'{base_path}/{file_path}-{i}.json'
+    full_file_path = f'{base_path}/{file_path}/{prefix}-raw-{i}.json'
     with open(full_file_path, 'r') as file:
         temp_data = load(file)
         all_data.extend(temp_data['measurements'])
