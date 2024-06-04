@@ -73,15 +73,13 @@ def extract_substring(text, pattern):
     else:
         return None
 
-base_path = '/home/sarwan/Downloads/temp'
+base_path = '/home/sarwan/Downloads'
 
 number_of_files = 2
 
-temp_suffix = ['']
-
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/abds-offline-devices.json' # -{temp_suffix[i - 1]}
-    output_path = f'{base_path}/abds-offline-devices.csv'
+    input_path = f'{base_path}/abds-all-bikes.json' # -{temp_suffix[i - 1]}
+    output_path = f'{base_path}/2024-06-04-abds-all-bikes.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
@@ -89,15 +87,21 @@ for i in range(1, number_of_files + 1):
     df = json_normalize(data)
 
     df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
-    df['updatedAt'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-    df['updatedAt'] = df['updatedAt'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+    df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
 
-    columns_order = ['bike_number', 'internalId','name','imei','iccid', 'updatedAt', 'updatedAt.unix']
+    columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status']
 
-    replace_substring_from_columns('$date.$numberLong','unix')
     replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+    replace_substring_from_columns('iccid','incomplete_iccid')
+    replace_substring_from_columns('serialNumber','iccid')
     delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+    
     rearrange_columns(columns_order)
+
+    df['status'] = df['status'].replace('AVAILABLE', 'ACTIVE').replace('UNAVAILABLE', 'DOWN')
 
     # rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
 

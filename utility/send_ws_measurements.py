@@ -11,20 +11,26 @@ tenant_token_map = {
     "t217861659": "C8Y_RENSAIR_TOKEN",
     "t160245771": "C8Y_ORANO_TOKEN"
 }
+
+tenant_url_map = {
+    "t160245771": "k8s-orano-backend.xelerate.solutions",
+    "t217861659": "k8s-e2e-backend.xelerate.solutions"
+}
+
 all_data = []
 
 # Edit here START ----------------------------------
 
 endpoint = 'wslistener/populateData'
-backend = 'k8s-e2e-backend.xelerate.solutions'
 base_path = './utility'
 file_path = 'raw_c8y_measurements_to_send_to_wslistener'
 tenant = "t217861659"
-no_of_files = 1
-prefix = "orano"
+no_of_files = 2
+prefix = "rensair"
 
 # Edit here STOP -----------------------------------
 
+backend = tenant_url_map[tenant]
 token = getenv(tenant_token_map[tenant]).removeprefix('Basic ')
 
 body_obj = {"topic": "MeasurementPopulation", "data": {
@@ -42,9 +48,14 @@ for i in range(1 , no_of_files + 1):
         temp_data = load(file)
         all_data.extend(temp_data['measurements'])
 
-print('Sending data...')
+print('Sample data:')
+print(dumps(all_data[0], indent=4))
 
 total_data_count = len(all_data)
+print('Total data:', total_data_count)
+
+print('\nSending data...')
+sleep(2)
 
 count = 1
 

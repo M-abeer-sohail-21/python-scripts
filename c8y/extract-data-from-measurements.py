@@ -14,7 +14,7 @@ devices_with_no_data = [63593,14787,14912,70079,72748,96168]
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12112]
+    devices_of_interest = [96201]
     
     devices_of_interest = list(set(devices_of_interest) - set(devices_with_no_data))
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]

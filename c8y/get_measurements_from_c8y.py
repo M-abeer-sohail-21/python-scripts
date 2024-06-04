@@ -40,8 +40,8 @@ auth_token = ''
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12112]
-    auth_token = os.getenv('C8Y_ABDS_AUTH')
+    devices_of_interest = [96201]
+    auth_token = os.getenv('C8Y_ABDS_TOKEN')
     # Edit here STOP -------------
 
     devices_of_interest = list(set(devices_of_interest) - set(devices_with_no_data))

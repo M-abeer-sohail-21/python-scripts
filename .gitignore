@@ -6,3 +6,4 @@
 *.zip*
 *ignore*
 *__pycache__*
+*.html
