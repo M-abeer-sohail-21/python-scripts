@@ -2,6 +2,7 @@ from pandas import read_csv, json_normalize, to_datetime, notnull
 from csv import reader
 from json import load
 from re import search
+from pytz import timezone
 
 def delete_columns(col):
     global df
@@ -9,7 +10,7 @@ def delete_columns(col):
 
 def rearrange_columns(order, delete_others=False):
     global df
-    print(Warning("All column names must be unqiue! Expect weird behavior otherwise."))
+    print(Warning("All column names must be unique! Expect weird behavior otherwise."))
     df = df[order]
 
     if delete_others:
@@ -73,35 +74,50 @@ def extract_substring(text, pattern):
     else:
         return None
 
-base_path = '/home/sarwan/Downloads'
+base_path = '/home/sarwan/work/scratchpad/node-scripts/finalResult.json'
 
-number_of_files = 2
+number_of_files = 1
 
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/abds-all-bikes.json' # -{temp_suffix[i - 1]}
-    output_path = f'{base_path}/2024-06-04-abds-all-bikes.csv'
+    input_path = base_path # f'{base_path}/abds-down-bikes.json' # -{temp_suffix[i - 1]}
+    output_path = f'./2024-06-10-7015-issue.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
-
-    df = json_normalize(data)
-
-    df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
-    df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-    df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
-
-    columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status']
-
-    replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-    replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-    replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
-    replace_substring_from_columns('iccid','incomplete_iccid')
-    replace_substring_from_columns('serialNumber','iccid')
-    delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
     
-    rearrange_columns(columns_order)
+    final_data = []
 
-    df['status'] = df['status'].replace('AVAILABLE', 'ACTIVE').replace('UNAVAILABLE', 'DOWN')
+    for elem in data:
+        for elem2 in elem['data']['Content']['AVL_Datas']:
+            elem2['ServerTimeStamp'] = elem['timestamp']
+            elem2['Date'] = elem['date']
+        
+        final_data.extend(elem['data']['Content']['AVL_Datas'])
+
+    df = json_normalize(final_data)
+    replace_substring_from_columns('GPSelement.','')
+    replace_substring_from_columns('IOelement.Elements.','')
+    replace_substring_from_columns('Timestamp','DeviceTimeStamp')
+
+    rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
+
+    # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+    # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+
+    # columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status', 'lastMessage']
+
+    # replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    # replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+    # replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+    # replace_substring_from_columns('iccid','incomplete_iccid')
+    # replace_substring_from_columns('serialNumber','iccid')
+    # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+    
+    # rearrange_columns(columns_order)
+
+    # df['status'] = df['status'].replace('AVAILABLE', 'ACTIVE').replace('UNAVAILABLE', 'DOWN')
+    # df['lastMessage'] = to_datetime(df['lastMessage']).dt.tz_convert('Asia/Dubai')
 
     # rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
 
@@ -126,6 +142,7 @@ for i in range(1, number_of_files + 1):
     # move_column_to_position('time', 3)
 
     print(df.head(20))
+    print(df.columns.to_list())
 
     df.to_csv(output_path, index=False)
     

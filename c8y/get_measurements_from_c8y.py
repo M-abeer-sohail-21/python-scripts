@@ -25,22 +25,22 @@ sources_to_make = []
 tenant = "t146989263"
 page_size = "1750"
 
-# NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168
+# NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168, 11865
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 # TODO: Modify to get device list and source id list from file
 
-devices_list = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 12286, 10614, 10616, 70079, 10372, 50221, 12053, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12115, 12486, 12490, 63589, 70086, 72759, 72763, 96199, 97405, 12112]
+devices_list = [96201, 96168, 98681, 70089, 70091, 70080, 12485, 12483, 12482, 12291, 12287, 50241, 10622, 12108, 10617, 50224, 12495, 11865, 10614, 10616, 70079, 10372, 50221, 12084, 70081, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12115, 12486, 12490, 63589, 70086, 72759, 72763, 96199, 97405, 12112, 12075, 50226]
 
-source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127]
+source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127, 49386, 337216]
 
-devices_with_no_data = [63593,14787,14912,70079,72748,96168]
+devices_with_no_data = [63593,14787,14912,70079,72748,96168,11865]
 
 auth_token = ''
 
 try:
     # Edit here START ------------
-    devices_of_interest = [96201]
+    devices_of_interest = [10616]
     auth_token = os.getenv('C8Y_ABDS_TOKEN')
     # Edit here STOP -------------
 
@@ -68,10 +68,19 @@ except ValueError as e:
     exit()
 
 if enable_time_frame:
-    days_to_go_back = int(input('Enter number of days to go back: '))
-    now = datetime.now(timezone.utc)
-    date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-    date_from = (now - timedelta(days=days_to_go_back)).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    zulu_time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+    # days_to_go_back = int(input('Enter number of days to go back: '))
+    # now = datetime.now(timezone.utc)
+    # date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    # date_from = (now - timedelta(days=days_to_go_back)).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    date_from = datetime.strptime(input("Enter start date: "), zulu_time_format)
+    date_to = datetime.strptime(input("Enter end date: "), zulu_time_format)
+
+    if date_to - date_from < timedelta(minutes=1):
+        raise ValueError('date_from is greater than date_to!')
+    
+    date_from = datetime.strftime(date_from, zulu_time_format)
+    date_to = datetime.strftime(date_to, zulu_time_format)
 
     print(f'Date from: {date_from}, Date to: {date_to}\n')
 # Edit here STOP -------------
@@ -112,7 +121,7 @@ for i in range(total_devices_count):
             raise DataVerificationError(f'Device number and name mismatch! Device: {device_number}, Name: {device_name}')
 
         while True:
-                params = {'source': source, 'pageSize': page_size, 'currentPage': api_request_page_count}
+                params = {'source': source, 'pageSize': page_size, 'currentPage': api_request_page_count, revert: True}
 
                 if enable_time_frame:
                     params['dateTo'] = date_to

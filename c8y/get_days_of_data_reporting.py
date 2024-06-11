@@ -5,7 +5,7 @@ from datetime import timedelta
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 # Edit here START ------------
-devices_of_interest = [96201]
+devices_of_interest = []
 
 devices_with_no_data = [63593,14787,14912,70079,72748,96168]
 # Edit here STOP -------------
