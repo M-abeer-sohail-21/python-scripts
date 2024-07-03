@@ -37,9 +37,9 @@ def generate_dict(input_file_path, int_key = False):
 def convert_epoch_to_iso(column_name, new_column_name, unit='s'):
     global df
     # Convert epoch time to datetime, handling errors by coercing invalid values
-    df['new_column_name'] = to_datetime(df[column_name], unit=unit, errors='coerce')
+    df[new_column_name] = to_datetime(df[column_name], unit=unit, errors='coerce')
     # Convert datetime to ISO format
-    df['new_column_name'] = df['new_column_name'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat() if notnull(x) else None)
+    df[new_column_name] = df[new_column_name].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat() if notnull(x) else None)
 
 def replace_substring_from_columns(substring, to_replace_with):
     global df
@@ -74,75 +74,57 @@ def extract_substring(text, pattern):
     else:
         return None
 
-base_path = '/home/sarwan/work/scratchpad/node-scripts/finalResult.json'
-
+# Edit here START ----------------------------------------------------------------------
+base_path = '/home/sarwan/Downloads'
 number_of_files = 1
+# Edit here STOP -----------------------------------------------------------------------
 
 for i in range(1, number_of_files + 1):
-    input_path = base_path # f'{base_path}/abds-down-bikes.json' # -{temp_suffix[i - 1]}
-    output_path = f'./2024-06-10-7015-issue.csv'
+    input_path = f'{base_path}/abds-all-bikes.json' # -{temp_suffix[i - 1]}
+    output_path = f'{base_path}/abds-all-bikes.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
-    
-    final_data = []
 
-    for elem in data:
-        for elem2 in elem['data']['Content']['AVL_Datas']:
-            elem2['ServerTimeStamp'] = elem['timestamp']
-            elem2['Date'] = elem['date']
+    df = json_normalize(data)
+    
+    df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+    df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+
+    columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status', 'lastMessage']
+
+    replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+    replace_substring_from_columns('iccid','incomplete_iccid')
+    replace_substring_from_columns('serialNumber','iccid')
+    delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+    df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+    
+    rearrange_columns(columns_order)
+
+    # -----------------------------------------------------------------------
+    # Get data from Teltonika parser output
+
+    # final_data = []
+
+    # for elem in data:
+    #     for elem2 in elem['data']['Content']['AVL_Datas']:
+    #         elem2['ServerTimeStamp'] = elem['timestamp']
+    #         elem2['Date'] = elem['date']
         
-        final_data.extend(elem['data']['Content']['AVL_Datas'])
+    #     final_data.extend(elem['data']['Content']['AVL_Datas'])
 
-    df = json_normalize(final_data)
-    replace_substring_from_columns('GPSelement.','')
-    replace_substring_from_columns('IOelement.Elements.','')
-    replace_substring_from_columns('Timestamp','DeviceTimeStamp')
+    # replace_substring_from_columns('GPSelement.','')
+    # replace_substring_from_columns('IOelement.Elements.','')
+    # replace_substring_from_columns('Timestamp','DeviceTimeStamp')
 
-    rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
+    # rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
 
-    # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
-    # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-    # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
-
-    # columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status', 'lastMessage']
-
-    # replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-    # replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-    # replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
-    # replace_substring_from_columns('iccid','incomplete_iccid')
-    # replace_substring_from_columns('serialNumber','iccid')
-    # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
-    
-    # rearrange_columns(columns_order)
-
-    # df['status'] = df['status'].replace('AVAILABLE', 'ACTIVE').replace('UNAVAILABLE', 'DOWN')
-    # df['lastMessage'] = to_datetime(df['lastMessage']).dt.tz_convert('Asia/Dubai')
-
-    # rearrange_columns(["name", "internalId", "deviceType", "tenant", "packetFromPlatform.c8y_Hardware.serialNumber", "packetFromPlatform.c8y_Mobile.cellId", "packetFromPlatform.c8y_Mobile.iccid", "packetFromPlatform.c8y_Mobile.imei", "packetFromPlatform.c8y_Mobile.imsi", "packetFromPlatform.c8y_Mobile.lac", "packetFromPlatform.c8y_Mobile.mcc", "packetFromPlatform.c8y_Mobile.mnc"])
-
-    # replace_substring_from_columns("packetFromPlatform.", "")
-    # replace_substring_from_columns("c8y_Mobile.", "")
-    # replace_substring_from_columns("c8y_Hardware.", "")
-
-    # condition = df['iccid'].notnull() & df['iccid'].ne('')
-
-    # print(condition)
-
-    # filter_columns(["name", "iccid"], condition, True).to_csv(f'{base_path}/result.csv', index=False)
-
-    # remap_values(v1, v2, mapping_file_path, 1)
-
-    # convert_epoch_to_iso('time.$date.$numberLong', 'ms')
-
-    # delete_columns(['tenant', 'time.$date.$numberLong'])
-
-    # replace_substring_from_columns('reading.', '')
-
-    # move_column_to_position('time', 3)
+    # -----------------------------------------------------------------------
 
     print(df.head(20))
-    print(df.columns.to_list())
 
     df.to_csv(output_path, index=False)
     
