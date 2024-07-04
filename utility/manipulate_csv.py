@@ -80,8 +80,8 @@ number_of_files = 1
 # Edit here STOP -----------------------------------------------------------------------
 
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/abds-all-bikes.json' # -{temp_suffix[i - 1]}
-    output_path = f'{base_path}/abds-all-bikes.csv'
+    input_path = f'{base_path}/abds-bikes-all.json' # -{temp_suffix[i - 1]}
+    output_path = f'{base_path}/abds-bikes-all.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)

@@ -5,16 +5,14 @@ from datetime import timedelta
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 # Edit here START ------------
-devices_of_interest = []
-
-devices_with_no_data = [63593,14787,14912,70079,72748,96168]
+devices_of_interest = [96201, 96168, 98681, 12279, 12270, 12485, 12483, 12482, 12075, 98253, 12245, 10619, 10620, 10622, 12108, 50224, 12495, 11865, 12276, 10372, 50221, 97405, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 12692, 12687, 12693]
 # Edit here STOP -------------
 
 def get_days_of_data_reporting(device_number):
 
     file_to_load = f'./c8y/meas_csv_results/{device_number}.csv'
 
-    data = pd.read_csv(file_to_load, index_col='time', low_memory=False)
+    data = pd.read_csv(file_to_load, index_col='server_time', low_memory=False)
     data.index = pd.to_datetime(data.index, utc=True, format='ISO8601')
 
     unique_dates = pd.Series(data.index).map(lambda x: x.date()).unique()
@@ -60,24 +58,30 @@ def get_days_of_data_reporting(device_number):
     
     print(f'Last date in range: {sorted_dates[-1]}')
 
-devices_with_data = sorted(list(set(devices_of_interest) - set(devices_with_no_data)))
-
 print('\nDays of data reporting:')
 print('************************')
 
 x = int(input('Skip every X devices, X = '))
 count = 0
 
-print(f'devices_with_data: {devices_with_data}')
+print(f'devices of interest: {devices_of_interest}')
 
 start_from = int(input('Start from device number = '))
 
-for device in devices_with_data[devices_with_data.index(start_from):]:
-    print(f'\nDevice number: {device}')
-    print('-----------------------------------')
-    get_days_of_data_reporting(device)
+devices_with_no_data = []
 
-    count += 1
+for device in devices_of_interest[devices_of_interest.index(start_from):]:
+    try:
+        print(f'\nDevice number: {device}')
+        print('-----------------------------------')
+        get_days_of_data_reporting(device)
 
-    if count % x == 0:
-        input('...Press enter to continue...')
+        count += 1
+
+        if count % x == 0:
+            input('...Press enter to continue...')
+    except Exception as e:
+        print(e)
+        devices_with_no_data.append(device)
+
+print(f'Devices with no data: {devices_with_no_data}')
