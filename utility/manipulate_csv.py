@@ -75,34 +75,46 @@ def extract_substring(text, pattern):
         return None
 
 # Edit here START ----------------------------------------------------------------------
-base_path = '/home/sarwan/Downloads'
+base_path = "/home/sarwan/Downloads/"
 number_of_files = 1
 # Edit here STOP -----------------------------------------------------------------------
 
 for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/abds-bikes-all.json' # -{temp_suffix[i - 1]}
-    output_path = f'{base_path}/abds-bikes-all.csv'
+    input_path = f'{base_path}/monitorings.json'
+    output_path = f'{base_path}/monitorings.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
 
     df = json_normalize(data)
-    
-    df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
-    df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-    df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
 
-    columns_order = ['bike_number', 'internalId','name','imei','iccid', 'status', 'lastMessage']
-
-    replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-    replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-    replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
-    replace_substring_from_columns('iccid','incomplete_iccid')
-    replace_substring_from_columns('serialNumber','iccid')
-    delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
-    df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+    # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
     
-    rearrange_columns(columns_order)
+    # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+    # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+
+    # columns_order = ['internalId','bike_number','name','imei','hub_iccid','c8y_iccid', 'status', 'lastMessage']
+
+    # replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    # replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+    # replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+    # replace_substring_from_columns('iccid','c8y_iccid')
+    # replace_substring_from_columns('serialNumber','hub_iccid')
+    # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+    # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+    
+    # rearrange_columns(columns_order)
+
+    # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
+
+    df['time.unix'] = to_datetime(df['time.$date.$numberLong'], unit='ms')
+    df['time'] = df['time.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
+
+    df['createdAt.unix'] = to_datetime(df['createdAt.$date.$numberLong'], unit='ms')
+    df['createdAt'] = df['createdAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
+
+    delete_columns(['time.$date.$numberLong','createdAt.$date.$numberLong'])
 
     # -----------------------------------------------------------------------
     # Get data from Teltonika parser output

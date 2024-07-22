@@ -31,15 +31,15 @@ page_size = "1750"
 
 # TODO: Modify to get device list and source id list from file
 
-devices_list = [96201, 96168, 98681, 12692, 12278, 12270, 12485, 12483, 12482, 12687, 98253, 12273, 10622, 12108, 10617, 50224, 12495, 11865, 10614, 10616, 12276, 10372, 50221, 12084, 12693, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12609, 12486, 12490, 63589, 12694, 72759, 72763, 96199, 97405, 12245, 12075, 12269, 12279]
+devices_list = [96201, 96168, 98681, 12692, 12278, 12270, 12485, 12483, 12482, 12687, 98253, 12273, 10622, 12108, 10617, 50224, 12495, 11865, 10614, 10616, 12276, 10372, 50221, 12084, 12693, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12609, 12486, 12490, 63589, 12694, 72759, 72763, 96199, 97405, 12245, 12075, 12269, 12279, 97295, 98637]
 
-source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127, 49386, 337216, 3464]
+source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127, 49386, 337216, 3464, 3416, 4853912316]
 
 auth_token = ''
 
 try:
     # Edit here START ------------
-    devices_of_interest = [96201, 96168, 98681, 12279, 12270, 12485, 12483, 12482, 12075, 98253, 12245, 10619, 10620, 10622, 12108, 50224, 12495, 11865, 12276, 10372, 50221, 97405, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 12692, 12687, 12693]
+    devices_of_interest = [97295, 98637, 10619]
     auth_token = os.getenv('C8Y_ABDS_TOKEN')
     # Edit here STOP -------------
     
@@ -94,9 +94,6 @@ sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
 
 devices_no_data = []
 
-repeat_counter = 0
-repeat_until_count = 10
-
 total_devices_count = len(sources)
 
 for i in range(total_devices_count):
@@ -118,6 +115,7 @@ for i in range(total_devices_count):
             raise DataVerificationError(f'Device number and name mismatch! Device: {device_number}, Name: {device_name}')
 
         while True:
+            try:
                 params = {'source': source, 'pageSize': page_size, 'currentPage': api_request_page_count, "revert": True}
 
                 if enable_time_frame:
@@ -131,7 +129,6 @@ for i in range(total_devices_count):
                 print(' Status', response.status_code)
 
                 if response.status_code < 300:
-                    repeat_counter = 0
                     data = json.loads(response.text)
 
                     if len(data['measurements']) == 0:
@@ -150,13 +147,13 @@ for i in range(total_devices_count):
                     all_data.extend(data_list)
                 
                     api_request_page_count += 1
-                
+
+            except Exception as e:
+                choice = input(f'Unexpected exception encountered: {e}. Continue? (y)')
+                if choice.lower() == 'y':
+                    exit()
                 else:
-                    repeat_counter += 1
-                    if repeat_counter > repeat_until_count:
-                        print('Reached maximum retries')
-                        raise MaxRetriesExceededError(f'Max retries reached for device {device_number}')
-        
+                    pass
 
         print('End. Device number:',device_number, 'Source:', source)
         print('---------------------------------------------------------------------------------------------')

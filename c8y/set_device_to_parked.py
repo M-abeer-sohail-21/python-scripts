@@ -1,5 +1,7 @@
 # DISCLAIMER: RUN THIS SCRIPT WITH EDITS AND IF YOU KNOW WHAT YOU"RE DOING!!!
 
+# TODO: Verify device name to change is correct by comparing with bike number
+
 import pandas as pd
 import requests as req
 import os

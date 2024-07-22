@@ -5,7 +5,7 @@ from datetime import timedelta
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 # Edit here START ------------
-devices_of_interest = [96201, 96168, 98681, 12279, 12270, 12485, 12483, 12482, 12075, 98253, 12245, 10619, 10620, 10622, 12108, 50224, 12495, 11865, 12276, 10372, 50221, 97405, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 12692, 12687, 12693]
+devices_of_interest = [97295, 98637, 10619]
 # Edit here STOP -------------
 
 def get_days_of_data_reporting(device_number):
