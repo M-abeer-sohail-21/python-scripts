@@ -113,6 +113,8 @@ for i in range(total_devices_count):
         if str(device_number) not in device_name:
             devices_no_data.append(device_number)
             raise DataVerificationError(f'Device number and name mismatch! Device: {device_number}, Name: {device_name}')
+        
+        max_retry_count = 0
 
         while True:
             try:
@@ -147,9 +149,15 @@ for i in range(total_devices_count):
                     all_data.extend(data_list)
                 
                     api_request_page_count += 1
+                
+                else:
+                    max_retry_count += 1
+
+                    if max_retry_count > 5:
+                        raise MaxRetriesExceededError('Max retries for API call exceeded with 4XX status')
 
             except Exception as e:
-                choice = input(f'Unexpected exception encountered: {e}. Continue? (y)')
+                choice = input(f'Unexpected exception encountered: {e}. Exit? (y)')
                 if choice.lower() == 'y':
                     exit()
                 else:
