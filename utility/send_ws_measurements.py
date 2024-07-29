@@ -9,17 +9,21 @@ load_dotenv()
 tenant_token_map = {
     "t1210372600": 'C8Y_E2E_TOKEN',
     "t217861659": "C8Y_RENSAIR_TOKEN",
-    "t160245771": "C8Y_ORANO_TOKEN"
+    "t160245771": "C8Y_ORANO_TOKEN",
+    "t146989263": "C8Y_ABDS_TOKEN"
 }
 
 tenant_url_map = {
-    "t160245771": "k8s-orano-backend.xelerate.solutions",
-    "t217861659": "k8s-e2e-backend.xelerate.solutions"
+    "t160245771": "k8s-orano-backend.xelerate.solutions", # TODO: CHANGE to Azure
+    "t217861659": "k8s-e2e-backend.xelerate.solutions", # TODO: CHANGE to Azure
+    "t146989263": "albusayra-backend.xelerate.digital"
 }
 
 all_data = []
 
 # Edit here START ----------------------------------
+
+# The raw data is taken directly from c8y JSON data
 
 endpoint = 'wslistener/populateData'
 base_path = './utility'

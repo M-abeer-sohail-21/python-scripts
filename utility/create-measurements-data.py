@@ -5,6 +5,8 @@ from time import sleep
 all_meas = []
 results = []
 
+# TODO: Check create_test_data to see how to make it more unified and modular
+
 # ------------------------------------------------------Edit below------------------------------------------------------
 main_folder = "utility"
 c8y_api_resp_file_prefix = main_folder + "/raw-meas-jsons/raw"

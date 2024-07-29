@@ -76,12 +76,13 @@ def extract_substring(text, pattern):
 
 # Edit here START ----------------------------------------------------------------------
 base_path = "/home/sarwan/Downloads/"
-number_of_files = 1
+number_of_files = 2
+file_suffixes = ['c8y', 'bridge']
 # Edit here STOP -----------------------------------------------------------------------
 
-for i in range(1, number_of_files + 1):
-    input_path = f'{base_path}/monitorings.json'
-    output_path = f'{base_path}/monitorings.csv'
+for i in range(0, number_of_files):
+    input_path = f'{base_path}/abds-devices-all-{file_suffixes[i]}.json'
+    output_path = f'{base_path}/abds-devices-all-{file_suffixes[i]}.csv'
 
     with open(input_path, 'r') as file:
         data = load(file)
@@ -90,34 +91,37 @@ for i in range(1, number_of_files + 1):
 
     # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
     
-    # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
-    # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-    # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+    df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+    df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+    df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
 
-    # columns_order = ['internalId','bike_number','name','imei','hub_iccid','c8y_iccid', 'status', 'lastMessage']
+    columns_order = ['internalId','bike_number','name','imei','hub_iccid','c8y_iccid', 'status', 'lastMessage']
 
-    # replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-    # replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-    # replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
-    # replace_substring_from_columns('iccid','c8y_iccid')
-    # replace_substring_from_columns('serialNumber','hub_iccid')
-    # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
-    # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+    replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+    replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+    replace_substring_from_columns('iccid','c8y_iccid')
+    replace_substring_from_columns('serialNumber','hub_iccid')
+    delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+    df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
     
-    # rearrange_columns(columns_order)
+    rearrange_columns(columns_order)
 
     # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
 
-    df['time.unix'] = to_datetime(df['time.$date.$numberLong'], unit='ms')
-    df['time'] = df['time.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
+    # --------------- FOR CONN. CBT. COSTA RICA ------------------------------------------------------ #
 
-    df['createdAt.unix'] = to_datetime(df['createdAt.$date.$numberLong'], unit='ms')
-    df['createdAt'] = df['createdAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
+    # df['time.unix'] = to_datetime(df['time.$date.$numberLong'], unit='ms')
+    # df['time'] = df['time.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
 
-    delete_columns(['time.$date.$numberLong','createdAt.$date.$numberLong'])
+    # df['createdAt.unix'] = to_datetime(df['createdAt.$date.$numberLong'], unit='ms')
+    # df['createdAt'] = df['createdAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('America/Costa_Rica').isoformat())
 
-    # -----------------------------------------------------------------------
-    # Get data from Teltonika parser output
+    # delete_columns(['time.$date.$numberLong','createdAt.$date.$numberLong'])
+
+    # --------------- FOR CONN. CBT. COSTA RICA ------------------------------------------------------ #
+
+    # ------ Get data from Teltonika parser output---------------------------------------------------- #
 
     # final_data = []
 
@@ -134,7 +138,7 @@ for i in range(1, number_of_files + 1):
 
     # rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
 
-    # -----------------------------------------------------------------------
+    # ------ Get data from Teltonika parser output---------------------------------------------------- #
 
     print(df.head(20))
 
