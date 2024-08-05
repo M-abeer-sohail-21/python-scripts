@@ -3,6 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
+from ignore_constants import *
 class MaxRetriesExceededError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
     pass
@@ -29,18 +30,15 @@ page_size = "1750"
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 # NAME CHANGE on 2024-07-03. Check code history
 
-# TODO: Modify to get device list and source id list from file
-
-devices_list = [96201, 96168, 98681, 12692, 12278, 12270, 12485, 12483, 12482, 12687, 98253, 12273, 10622, 12108, 10617, 50224, 12495, 11865, 10614, 10616, 12276, 10372, 50221, 12084, 12693, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12609, 12486, 12490, 63589, 12694, 72759, 72763, 96199, 97405, 12245, 12075, 12269, 12279, 97295, 98637]
-
-source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127, 49386, 337216, 3464, 3416, 4853912316]
-
 auth_token = ''
 
 try:
     # Edit here START ------------
-    devices_of_interest = [97295, 98637, 10619]
+    devices_of_interest = [12284, 72741]
     auth_token = os.getenv('C8Y_ABDS_TOKEN')
+    year = 2024
+    month = 8
+    day = 5
     # Edit here STOP -------------
     
     not_found_devices = [x for x in devices_of_interest if try_except(lambda x=x,y=devices_list,z=source_ids_list: z[y.index(x)])]
@@ -66,12 +64,12 @@ except ValueError as e:
 
 if enable_time_frame:
     zulu_time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-    # days_to_go_back = int(input('Enter number of days to go back: '))
     # now = datetime.now(timezone.utc)
     # date_to = now.isoformat(timespec="milliseconds").replace("+00:00", "Z")
     # date_from = (now - timedelta(days=days_to_go_back)).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-    date_from = datetime.strptime(input("Enter start date: "), zulu_time_format)
-    date_to = datetime.strptime(input("Enter end date: "), zulu_time_format)
+    date_to = datetime.strptime(f'{year}-{str(month).zfill(2)}-{str(day).zfill(2)}T00:00:00.000Z', zulu_time_format)
+    days_to_go_back = int(input('Enter number of days to go back: '))
+    date_from = date_to - timedelta(days = days_to_go_back)
 
     if date_to - date_from < timedelta(minutes=1):
         raise ValueError('date_from is greater than date_to!')
@@ -106,6 +104,12 @@ for i in range(total_devices_count):
         managed_objects_url = f'{managed_obj_url}/{source}'
 
         response = requests.get(url=managed_objects_url, headers=headers)
+
+        json_obj = json.loads(response.text)
+
+        if "error" in json_obj.keys():
+            raise DataVerificationError(f'Error received: {json_obj["error"]["message"]}')
+
         device_name = json.loads(response.text)['name']
 
         print(f'Processing device {i+1} of {total_devices_count}')

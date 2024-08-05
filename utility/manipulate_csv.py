@@ -76,11 +76,12 @@ def extract_substring(text, pattern):
 
 # Edit here START ----------------------------------------------------------------------
 base_path = "/home/sarwan/Downloads/"
-number_of_files = 2
-file_suffixes = ['c8y', 'bridge']
+file_suffixes = ['bridge']
 # Edit here STOP -----------------------------------------------------------------------
 
-for i in range(0, number_of_files):
+number_of_files = len(file_suffixes)
+
+for i in range(number_of_files):
     input_path = f'{base_path}/abds-devices-all-{file_suffixes[i]}.json'
     output_path = f'{base_path}/abds-devices-all-{file_suffixes[i]}.csv'
 
@@ -95,7 +96,7 @@ for i in range(0, number_of_files):
     df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
     df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
 
-    columns_order = ['internalId','bike_number','name','imei','hub_iccid','c8y_iccid', 'status', 'lastMessage']
+    columns_order = ['imei','internalId','bike_number',	'name',	'hub_iccid', 'c8y_iccid', 'status', 'lastMessage']
 
     replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
     replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
@@ -121,7 +122,7 @@ for i in range(0, number_of_files):
 
     # --------------- FOR CONN. CBT. COSTA RICA ------------------------------------------------------ #
 
-    # ------ Get data from Teltonika parser output---------------------------------------------------- #
+    # --------------- Get data from Teltonika parser output ------------------------------------------ #
 
     # final_data = []
 
@@ -138,7 +139,7 @@ for i in range(0, number_of_files):
 
     # rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
 
-    # ------ Get data from Teltonika parser output---------------------------------------------------- #
+    # --------------- Get data from Teltonika parser output------------------------------------------- #
 
     print(df.head(20))
 

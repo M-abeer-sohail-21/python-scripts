@@ -1,22 +1,13 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import json
-from os import path
+from ignore_constants import *
 
 # NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168, 11865
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
-# TODO: Modify to get device list and source id list from file
-
-devices_list = [96201, 96168, 98681, 12692, 12278, 12270, 12485, 12483, 12482, 12687, 98253, 12273, 10622, 12108, 10617, 50224, 12495, 11865, 10614, 10616, 12276, 10372, 50221, 12084, 12693, 14773, 14779, 14913, 14787, 72743, 63593, 72748, 14912, 10619, 10620, 12609, 12486, 12490, 63589, 12694, 72759, 72763, 96199, 97405, 12245, 12075, 12269, 12279, 97295, 98637]
-
-source_ids_list = [389, 3420, 2483, 2508, 3456, 3482, 46964, 47674, 47718, 49492, 61683, 63055, 69952, 69305, 74249, 77532, 152454, 388751, 1049556, 1053103, 1068248, 1128729, 1422168, 2636415, 48727, 6253904087, 3953908687, 29139236, 34695733, 31114007536, 87107442643, 60107407843, 26637896, 70048, 73289, 66930, 2530, 393621, 47107417697, 3467, 51107442290, 37107398393, 3241, 49237155, 66127, 49386, 337216, 3464, 3416, 4853912316]
-
-auth_token = ''
-
 try:
     # Edit here START ------------
-    devices_of_interest = [97295, 98637, 10619]
+    devices_of_interest = [12284, 72741]
 
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]
 
@@ -26,7 +17,6 @@ except ValueError as e:
     exit()
 
 sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
-
 count = 1
 num_of_sources = len(sources)
 

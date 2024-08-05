@@ -5,7 +5,7 @@ from datetime import timedelta
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 # Edit here START ------------
-devices_of_interest = [97295, 98637, 10619]
+devices_of_interest = [12284, 72741]
 # Edit here STOP -------------
 
 def get_days_of_data_reporting(device_number):
@@ -64,13 +64,9 @@ print('************************')
 x = int(input('Skip every X devices, X = '))
 count = 0
 
-print(f'devices of interest: {devices_of_interest}')
-
-start_from = int(input('Start from device number = '))
-
 devices_with_no_data = []
 
-for device in devices_of_interest[devices_of_interest.index(start_from):]:
+for device in devices_of_interest:
     try:
         print(f'\nDevice number: {device}')
         print('-----------------------------------')
