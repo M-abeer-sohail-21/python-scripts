@@ -27,7 +27,7 @@ sleep(2)
 total_count = len(all_meas)
 
 for i in range(total_count):
-    print(f"...object ID: {i + 1} of {total_count}")
+    print(f"...object number: {i + 1} of {total_count}")
     test_obj = all_meas[i]
     time_in_sec = int(parse(test_obj['time']).timestamp() * 1000)
 
