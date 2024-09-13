@@ -8,7 +8,7 @@ from ignore_constants import *
 
 try:
     # Edit here START ------------
-    devices_of_interest =  [12284, 72741]
+    devices_of_interest =  [10622]
     # Edit here STOP -------------
 
     sources_to_make = [devices_list.index(x) for x in devices_of_interest]

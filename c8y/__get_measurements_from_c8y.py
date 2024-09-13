@@ -34,7 +34,7 @@ auth_token = ''
 
 try:
     # Edit here START ------------
-    devices_of_interest = [12284, 72741]
+    devices_of_interest = [10622]
     auth_token = os.getenv('C8Y_ABDS_TOKEN')
     year = 2024
     month = 8

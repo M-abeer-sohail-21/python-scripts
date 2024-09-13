@@ -51,7 +51,7 @@ def split_csv_file(input_file, output_dir):
                 for line in lines[start_index:end_index]:
                     writer.writerow(line)
 # -------------------------------------- START to edit here -----------------------------------------------
-input_file = '/home/sarwan/Downloads/salesforce-analytics-dump.csv'
-output_dir = '/home/sarwan/Downloads/salesforce-analytics-hourly-split-csv'
+input_file = '/home/sarwan/Downloads/salesforce-monitorings.csv'
+output_dir = '/home/sarwan/Downloads/salesforce-monitorings'
 # -------------------------------------------- END --------------------------------------------------------
 split_csv_file(input_file, output_dir)
