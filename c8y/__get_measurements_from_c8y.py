@@ -20,6 +20,12 @@ def try_except(func):
         print('[Error]: try_except: caught error:',e)
         return True
 
+def has_duplicates(input_list):
+    if not isinstance(input_list, list):
+        raise ValueError("Input must be a list")
+    
+    return len(input_list) != len(set(input_list))
+
 load_dotenv()
 
 sources_to_make = []
@@ -32,21 +38,23 @@ page_size = "1750"
 
 auth_token = ''
 
+if has_duplicates(devices_list) or has_duplicates(source_ids_list):
+    raise ValueError(f'Either devices list or source_ids_list contains duplicates: device_list {has_duplicates(devices_list)} source_ids_list {has_duplicates(source_ids_list)}')
+
 try:
-    # Edit here START ------------
-    devices_of_interest = [10622]
+    # Edit here START ------------    
     auth_token = os.getenv('C8Y_ABDS_TOKEN')
     year = 2024
     month = 8
     day = 5
     # Edit here STOP -------------
     
-    not_found_devices = [x for x in devices_of_interest if try_except(lambda x=x,y=devices_list,z=source_ids_list: z[y.index(x)])]
+    # This line is not relevant any more
+    # not_found_devices = [x for x in devices_of_interest if try_except(lambda x=x,y=devices_list,z=source_ids_list: z[y.index(x)])]
+    # if len(not_found_devices) != 0:
+    #     raise ValueError(f'Source IDs for these device numbers not found! {not_found_devices}')
 
-    if len(not_found_devices) != 0:
-        raise ValueError(f'Source IDs for these device numbers not found! {not_found_devices}')
-
-    sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+    sources_to_make = [devices_list.index(x) for x in devices_list]
 
     while True:
         enable_time_frame = input('A time frame is set? (y/n) ')

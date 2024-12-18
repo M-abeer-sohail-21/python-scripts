@@ -7,6 +7,7 @@ from os import path, remove
 from pytz import timezone
 from ijson import parse
 from datasets import load_dataset
+from datetime import datetime
 
 def delete_columns(col):
     global df
@@ -59,8 +60,8 @@ def move_column_to_position(column, pos):
 
 def remap_values(value1, value2, mapping_file_path, insert_location):
     global df
-    v1_v2_name_mapping = generate_dict(mapping_file_path)
-    df.insert(insert_location, value1, df[value2].map(v1_v2_name_mapping))
+    value1_value2_name_mapping = generate_dict(mapping_file_path)
+    df.insert(insert_location, value1, df[value2].map(value1_value2_name_mapping))
 
 def filter_columns(col_names, condition=None, print_output=False):
     global df
@@ -96,16 +97,16 @@ def filter_by_column(column, list_of_vals, return_not = False):
     return filtered_df
 
 # Edit here START ----------------------------------------------------------------------
-BASE_PATH = "/home/sarwan/Downloads/"
-FILE_SUFFIXES = ["analytics"] # ['analytics']
-INPUT_FILE_PREFIX= 'salesforce'
+BASE_PATH = "/home/sarwan/Downloads" # work/scratchpad/python-scripts"
+FILE_SUFFIXES =  ['01']
+INPUT_FILE_PREFIX=  'devices'
 GENERATE_BASE_CSV = False # TODO: Logic needs fixing
-LARGE_DATASET = True # TODO: Logic needs fixing, ALWAYS SET TO FALSE
+LARGE_DATASET = False # TODO: Logic needs fixing, ALWAYS SET TO FALSE
 USE_TEMP_PATH = False
-LOCAL_TIMEZONE = 'Europe/London'
+LOCAL_TIMEZONE = 'Asia/Karachi'
 # Edit here STOP -----------------------------------------------------------------------
 
-while True and LARGE_DATASET:
+while LARGE_DATASET:
     to_continue = input("Did you account for a large dataset? (y/n) ")
     if to_continue in ["y","n"]:
         if to_continue == "y":
@@ -116,6 +117,7 @@ while True and LARGE_DATASET:
 number_of_files = len(FILE_SUFFIXES)
 
 for i in range(number_of_files):
+
     INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.json'
     OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
     TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
@@ -123,23 +125,12 @@ for i in range(number_of_files):
     df = None
     temp_file_available = False
 
-    if LARGE_DATASET:
-        data = parse(open(INPUT_PATH, 'r'))
-        # TODO: Maybe this library won't work
-        # data = load_dataset("json", data_files=INPUT_PATH) # , split="train")
-
-        print(data)
-
-    else:
-        with open(INPUT_PATH, 'r') as file:
-            data = load(file)
-            df = json_normalize(data)
-
     try:
         if path.exists(TEMP_PATH) and USE_TEMP_PATH:
             df = read_csv(TEMP_PATH)
             temp_file_available = True
             GENERATE_BASE_CSV = False
+
     except FileNotFoundError:
         print('[Error] Temp file not found! generating csv from JSON')
         if not LARGE_DATASET:
@@ -147,32 +138,93 @@ for i in range(number_of_files):
                 with open(INPUT_PATH, 'r') as file:
                     data = load(file)
                     df = json_normalize(data)
-                    if type(df) != "<class 'NoneType'>":
+                    if str(type(df)) != "<class 'NoneType'>":
                         df.to_csv(TEMP_PATH, index=False)
 
+    if LARGE_DATASET:
+        data = parse(open(INPUT_PATH, 'r'))
+        df = DataFrame()
+
+        # TODO: Maybe this library won't work
+        # data = load_dataset("json", data_files=INPUT_PATH) # , split="train")
+
+    else:
+        with open(INPUT_PATH, 'r') as file:
+            data = load(file)
+            df = json_normalize(data)
+    
+    if str(type(df)) != "<class 'NoneType'>":
         # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
         
-        # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+        df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
         # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
-        # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert('Asia/Karachi').isoformat())
+        # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
 
-        # columns_order = ['imei','internalId','bike_number',	'name',	'hub_iccid', 'c8y_iccid', 'status', 'lastMessage']
+        columns_order = ['imei','internalId','bike_number',	'name',	'hub_iccid', 'c8y_iccid', 'status', 'lastMessage']
 
-        # replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-        # replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-        # replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
-        # replace_substring_from_columns('iccid','c8y_iccid')
-        # replace_substring_from_columns('serialNumber','hub_iccid')
-        # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
-        # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+        replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
+        replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
+        replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+        replace_substring_from_columns('iccid','c8y_iccid')
+        replace_substring_from_columns('serialNumber','hub_iccid')
+        delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+        df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+        df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
+        df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
         
-        # rearrange_columns(columns_order)
+        rearrange_columns(columns_order)
 
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
+        # -------------------------------- Check JM overheating device ----------------------------------- #
+
+
+
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
+        
         # --------------- PARSING SALESFORCE ANALYTICS (LARGE) ------------------------------------------- #
 
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # if not LARGE_DATASET:
+        #     raise Exception("LARGE_DATASET not set to True!")
+        
+        # columns = []
+        # record_dict = {}
+        # records = []
+
+        # count = 0
+
+        # for prefix, event, value in data:
+        #     if prefix == "item" and event == "end_map":
+        #         records.append(record_dict)
+        #         record_dict = {}
+        #         count += 1
+        #         print(f'Processed records: {count}')
+            
+        #     if prefix == "item.updatedAt.$date.$numberLong" or prefix == "item.time.$date.$numberLong":
+        #         key_name = prefix.split(".")[1]
+        #         record_dict[key_name] = value
+
+        #     if "item." in prefix and "_map" not in event: # Ignoring start_map and end_map events
+        #         prefix_parts = prefix.split(".")
+        #         levels = len(prefix_parts) - 2
+
+        #         if levels == 0:
+        #             column_name = prefix_parts[-1]
+        #             if column_name not in columns:
+        #                 columns.append(column_name)
+        #             record_dict[column_name] = value
+        
+        # df = DataFrame.from_dict(records, orient='columns')
+
+        # for column_name in ['time', 'updatedAt']:
+        #     df[column_name] = df[column_name].apply(lambda x: int(x))
+        #     df[f'{column_name}_utc'] = to_datetime(df[column_name], unit='ms')
+        #     df[column_name] = df[f'{column_name}_utc'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
+
+        # remap_values('name', 'sensorId', f'{BASE_PATH}/salesforce-devices.csv',0)
+        # delete_columns(['__v',"_id",'createdAt','sensorId','tenant','time_utc','updatedAt_utc'])        
+
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
         # --------------- FOR CONN. CBT. COSTA RICA ------------------------------------------------------ #
 
@@ -184,16 +236,11 @@ for i in range(number_of_files):
 
         # delete_columns(['time.$date.$numberLong','createdAt.$date.$numberLong'])
 
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
-        # --------------- Manipulate Salesforce "analytics" -------------------------------------------- #
+        # --------------- Manipulate Salesforce "analytics" ---------------------------------------------- #
 
-        print(df.columns())
-        print(len(df))
-        # df['time.utc'] = to_datetime(df['time.$date.$numberLong'], unit='ms')
-        # df['time'] = df['time.utc'].apply(lambda x: x.tz_localize('UTC').tz_convert(local_timezone).isoformat())
-
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
         # --------------- Manipulate Salesforce "monitorings" -------------------------------------------- #
         
@@ -213,7 +260,7 @@ for i in range(number_of_files):
         # except FileNotFoundError:
         #     print('[Error] Names file not found!')
 
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
         # --------------- Get data from Teltonika parser output ------------------------------------------ #
 
@@ -232,7 +279,7 @@ for i in range(number_of_files):
 
         # rearrange_columns(['Date','ServerTimeStamp', 'DeviceTimeStamp', 'Priority', 'Longitude', 'Latitude', 'Altitude', 'Angle', 'Satellites', 'Speed', '11', '14', '21', '24', '66', '67', '68', '69', '80', '113', '200', '237', '239', '240', '246', '247', 'IOelement.EventID', 'IOelement.ElementCount'])
 
-        # -------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------------- #
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
 
         print(df.head(20))
 

@@ -38,7 +38,7 @@ def split_csv_file(input_file, output_dir):
                 break
             
         for i in range(n + 1):
-            output_file = os.path.join(output_dir, f'split_{i+1}.csv')
+            output_file = os.path.join(output_dir, f'{output_dir}_split_{i+1}.csv')
             with open(output_file, 'w', newline='') as outfile:
                 writer = csv.writer(outfile)
                 writer.writerow(header)  # Write the header to the first line of each file
@@ -51,7 +51,7 @@ def split_csv_file(input_file, output_dir):
                 for line in lines[start_index:end_index]:
                     writer.writerow(line)
 # -------------------------------------- START to edit here -----------------------------------------------
-input_file = '/home/sarwan/Downloads/salesforce-monitorings.csv'
-output_dir = '/home/sarwan/Downloads/salesforce-monitorings'
+input_file = '/home/sarwan/Downloads/salesforce-analytics.csv'
+output_dir = '/home/sarwan/Downloads/salesforce-analytics'
 # -------------------------------------------- END --------------------------------------------------------
 split_csv_file(input_file, output_dir)

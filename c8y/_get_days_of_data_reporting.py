@@ -1,18 +1,15 @@
 import pandas as pd
 from datetime import timedelta
+from ignore_constants import *
 
 # NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
-
-# Edit here START ------------
-devices_of_interest = [10622]
-# Edit here STOP -------------
 
 def get_days_of_data_reporting(device_number):
 
     file_to_load = f'./c8y/meas_csv_results/{device_number}.csv'
 
-    data = pd.read_csv(file_to_load, index_col='server_time', low_memory=False)
+    data = pd.read_csv(file_to_load, index_col='server_time',low_memory=False)
     data.index = pd.to_datetime(data.index, utc=True, format='ISO8601')
 
     unique_dates = pd.Series(data.index).map(lambda x: x.date()).unique()
@@ -61,21 +58,17 @@ def get_days_of_data_reporting(device_number):
 print('\nDays of data reporting:')
 print('************************')
 
-x = int(input('Skip every X devices, X = '))
-count = 0
 
 devices_with_no_data = []
 
-for device in devices_of_interest:
+for device in devices_list:
     try:
         print(f'\nDevice number: {device}')
         print('-----------------------------------')
         get_days_of_data_reporting(device)
 
-        count += 1
-
-        if count % x == 0:
-            input('...Press enter to continue...')
+        
+        input('...Press enter to continue...')
     except Exception as e:
         print(e)
         devices_with_no_data.append(device)

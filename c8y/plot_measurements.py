@@ -7,23 +7,26 @@ from ignore_constants import *
 # DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
 
 try:
-    # Edit here START ------------
-    devices_of_interest =  [10622]
-    # Edit here STOP -------------
-
-    sources_to_make = [devices_list.index(x) for x in devices_of_interest]
+    if len(devices_list) != len(source_ids_list):
+        raise ValueError('Device list and source list mismatch!')    
 
 except ValueError as e:
-    print('[Error]: Device number inputted that is not there!', end=' ')
+    print('[Error]: ', end=' ')
     print(e)
     exit()
 
 dont_skip = False
 devices_with_no_data = []
 
-sources = [(source_ids_list[i], devices_list[i]) for i in sources_to_make]
+sources = [(source_ids_list[i], devices_list[i]) for i in range(len(devices_list))]
 
-number_of_days = int(input('Enter last number of days worth of data to process: '))
+try:
+    number_of_days = int(input('Enter last number of days worth of data to process: '))
+    if number_of_days <= 0:
+        raise ValueError('Value of number of days must be 1 or more!')
+        
+except Exception as e:
+    print('Error: Exception occurred: ', e)
 
 values_to_plot = [('ExternalVoltage', 'Bike voltage'),('GNSS_Status', 'GSM Status'), ('GSMSignal', 'Signal bars'), ('BatteryVoltage', 'Tracker battery voltage'), ('Battery', 'Tracker battery percent'), ('Satellites', 'Satellite count'), ('UnplugDetection', 'Unplug Alert')]
 
@@ -42,6 +45,9 @@ for source in sources:
 
         flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}.csv', index_col='server_time', low_memory=False)
         flattened_data.index = pd.to_datetime(flattened_data.index, utc=True, format='ISO8601')
+
+        if flattened_data.empty:
+            raise ValueError('Df is empty!')
 
         duration = flattened_data.index.max() - flattened_data.index.min()
 
@@ -98,17 +104,17 @@ for source in sources:
                 plt.close()
             
             except KeyError as e:
-                print(f'Ran into an error, key not found: {e}')
+                print(f'Ran into an error, key not found: {e}, device number {device_number}')
 
             except Exception as e:
                 print(f'🤣🤣 Ran into an error while plotting data for {device_number}: {e}')
-                devices_with_no_data.append(source[1])
         
         print(f'Processed device {count} of {num_of_sources}')
         count += 1
     except Exception as e:
-        print('🤣', e)
-        devices_with_no_data.append(source[1])
+        print(f'🤣 Exception for {device_number};', e)
+        if type(e) == type(ValueError()):
+            devices_with_no_data.append(source[1])
     
 
 print(f'devices with no data {list(set(devices_with_no_data))}')
