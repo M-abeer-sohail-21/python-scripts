@@ -15,13 +15,15 @@ except ValueError as e:
     print(e)
     exit()
 
-sources = [(source_ids_list[i], devices_list[i]) for i in range(len(devices_list))]
+# Edit START -------------------------------------------
+sources = device_source_pairs_with_data
+# Edit STOP --------------------------------------------
 count = 1
 num_of_sources = len(sources)
 
 for source in sources:
-    internal_id = source[0]
-    device_number = source[1]
+    internal_id = source[1]
+    device_number = source[0]
     all_data = []
     api_request_page_count = 1
     meas_json_file = f'./c8y/meas_json_results/{internal_id}.json'
@@ -65,6 +67,6 @@ for source in sources:
     print("Device number", str(device_number) + "]")
     print(flattened_data.head(3), flattened_data.tail(3), sep = '\n')
     print('--------------------------------------------------------------------------------------------------------------------------------')
-    flattened_data.to_csv(f'./c8y/meas_csv_results/{device_number}.csv')
+    flattened_data.to_csv(f'./c8y/meas_csv_results/{device_number}-{internal_id}.csv')
 
     count += 1

@@ -98,7 +98,7 @@ def filter_by_column(column, list_of_vals, return_not = False):
 
 # Edit here START ----------------------------------------------------------------------
 BASE_PATH = "/home/sarwan/Downloads" # work/scratchpad/python-scripts"
-FILE_SUFFIXES =  ['01']
+FILE_SUFFIXES =  ['02']
 INPUT_FILE_PREFIX=  'devices'
 GENERATE_BASE_CSV = False # TODO: Logic needs fixing
 LARGE_DATASET = False # TODO: Logic needs fixing, ALWAYS SET TO FALSE

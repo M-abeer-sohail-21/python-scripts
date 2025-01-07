@@ -26,6 +26,12 @@ def has_duplicates(input_list):
     
     return len(input_list) != len(set(input_list))
 
+# Edit here START --------------------------------
+
+skip_duplicate_check = True
+
+# Edit here END ----------------------------------
+
 load_dotenv()
 
 sources_to_make = []
@@ -38,8 +44,9 @@ page_size = "1750"
 
 auth_token = ''
 
-if has_duplicates(devices_list) or has_duplicates(source_ids_list):
-    raise ValueError(f'Either devices list or source_ids_list contains duplicates: device_list {has_duplicates(devices_list)} source_ids_list {has_duplicates(source_ids_list)}')
+if not skip_duplicate_check:
+    if has_duplicates(devices_list) or has_duplicates(source_ids_list):
+        raise ValueError(f'Either devices list or source_ids_list contains duplicates: device_list {has_duplicates(devices_list)} source_ids_list {has_duplicates(source_ids_list)}')
 
 try:
     # Edit here START ------------    
@@ -194,5 +201,13 @@ for i in range(total_devices_count):
 
 if (devices_no_data != []):
     print('No data for these devices in time range:')
+    device_numbers_with_no_data = ''
+    source_numbers_with_no_data = ''
     for device in devices_no_data:
-        print(device)
+        device_numbers_with_no_data += device[0] + ", "
+        source_numbers_with_no_data += device[1] + ", "
+    
+    print('Device numbers\n-------------------------')
+    print(device_numbers_with_no_data)
+    print('Source numbers\n-------------------------')
+    print(source_numbers_with_no_data)

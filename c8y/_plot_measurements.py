@@ -18,7 +18,9 @@ except ValueError as e:
 dont_skip = False
 devices_with_no_data = []
 
-sources = [(source_ids_list[i], devices_list[i]) for i in range(len(devices_list))]
+# Edit START -------------------------------------------
+sources = device_source_pairs_with_data
+# Edit STOP --------------------------------------------
 
 try:
     number_of_days = int(input('Enter last number of days worth of data to process: '))
@@ -30,7 +32,7 @@ except Exception as e:
 
 values_to_plot = [('ExternalVoltage', 'Bike voltage'),('GNSS_Status', 'GSM Status'), ('GSMSignal', 'Signal bars'), ('BatteryVoltage', 'Tracker battery voltage'), ('Battery', 'Tracker battery percent'), ('Satellites', 'Satellite count'), ('UnplugDetection', 'Unplug Alert')]
 
-count = 1
+count = 0
 num_of_sources = len(sources)
 
 for source in sources:
@@ -40,10 +42,10 @@ for source in sources:
             if result == "skip":
                 dont_skip = True
         
-        internal_id = source[0]
-        device_number = source[1]
+        internal_id = source[1]
+        device_number = source[0]
 
-        flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}.csv', index_col='server_time', low_memory=False)
+        flattened_data = pd.read_csv(f'./c8y/meas_csv_results/{device_number}-{internal_id}.csv', index_col='server_time', low_memory=False)
         flattened_data.index = pd.to_datetime(flattened_data.index, utc=True, format='ISO8601')
 
         if flattened_data.empty:
@@ -63,7 +65,7 @@ for source in sources:
                 value_to_plot_name = value_to_plot_tuple[1]
                 unit_for_value = flattened_data[f'{value_to_plot}.unit'].iloc[0]            
 
-                print(f'Processing {value_to_plot} for device {device_number}')
+                print(f'Processing {value_to_plot} for device {device_number}-{internal_id}')
                 print('*' * 30)
 
                 # Check if the duration is less than two days
@@ -93,7 +95,7 @@ for source in sources:
                 plt.grid(True) # Enable the grid
                 plt.xticks(rotation=45) # Adjust the rotation angle as needed
 
-                output_folder = f'./c8y/plots/{device_number}'
+                output_folder = f'./c8y/plots/{device_number}-{internal_id}'
 
                 # Save the plot as a PNG file
                 if not path.exists(output_folder):
@@ -109,8 +111,8 @@ for source in sources:
             except Exception as e:
                 print(f'🤣🤣 Ran into an error while plotting data for {device_number}: {e}')
         
-        print(f'Processed device {count} of {num_of_sources}')
         count += 1
+        print(f'Processed device {count} of {num_of_sources}')        
     except Exception as e:
         print(f'🤣 Exception for {device_number};', e)
         if type(e) == type(ValueError()):
