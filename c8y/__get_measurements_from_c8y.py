@@ -32,7 +32,7 @@ def has_duplicates(input_list):
 
 # Edit here START --------------------------------
 
-skip_duplicate_check = True
+skip_duplicate_check = False
 
 # Edit here END ----------------------------------
 

@@ -8,7 +8,7 @@ from datetime import datetime
 
 try:
     if len(devices_list) != len(source_ids_list):
-        raise ValueError('Device list and source list mismatch!')
+        raise ValueError('🤣 Device list and source list mismatch!')
 
 except ValueError as e:
     print('[Error]: ', end=' ')
@@ -28,13 +28,13 @@ for source in sources:
     api_request_page_count = 1
     meas_json_file = f'./c8y/meas_json_results/{internal_id}.json'
 
-    server_time_present = True
+    parse_server_time = True
 
     try:
         with open(meas_json_file, 'r') as file:
             all_data = json.load(file)
     except FileNotFoundError as e:
-        print('Error accessing measurements file:', e, 'moving on...')
+        print('🤣 Error accessing measurements file:', e, 'moving on...')
         continue
 
     # Flatten the nested dictionaries within the 'payload' key
@@ -45,13 +45,13 @@ for source in sources:
     try:
         flattened_data['server_time'] = [item['payload']['ServerTime']['value'] for item in all_data]
     except KeyError as e:
-        print(f'Key Error: {e}, ID {internal_id}')
-        server_time_present = False      
+        print(f'🤣 Key Error: {e}, ID {internal_id}. Using device_time as server time')
+        parse_server_time = False      
         flattened_data['server_time'] = [datetime.strptime(item['time'], "%Y-%m-%dT%H:%M:%S.%fZ") for item in all_data]
 
     # Convert 'device_time' column to datetime
     flattened_data['device_time'] = pd.to_datetime(flattened_data['device_time'])
-    if server_time_present:
+    if parse_server_time:
         flattened_data['server_time'] = pd.to_datetime(flattened_data['server_time'], unit='ms')
     
     flattened_data.set_index('server_time', inplace=True)
