@@ -1,9 +1,13 @@
 import json
 import requests
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv # python-dotenv is the pip library
 from datetime import datetime, timezone, timedelta
 from ignore_constants import *
+
+# NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168, 11865
+# DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
+# NAME CHANGE on 2024-07-03. Check code history
 class MaxRetriesExceededError(Exception):
     """Raised when the maximum number of retries has been exceeded."""
     pass
@@ -37,10 +41,6 @@ load_dotenv()
 sources_to_make = []
 tenant = "t146989263"
 page_size = "1750"
-
-# NO DATA FOR THESE (as of 2024-05-13): 63593, 14787, 14912, 70079, 72748, 96168, 11865
-# DATA WAY FAR BACK (as of 2024-05-15): 50221, 50224, 12483, 98681, 12287
-# NAME CHANGE on 2024-07-03. Check code history
 
 auth_token = ''
 
@@ -204,8 +204,8 @@ if (devices_no_data != []):
     device_numbers_with_no_data = ''
     source_numbers_with_no_data = ''
     for device in devices_no_data:
-        device_numbers_with_no_data += device[0] + ", "
-        source_numbers_with_no_data += device[1] + ", "
+        device_numbers_with_no_data += str(device[0]) + ", "
+        source_numbers_with_no_data += str(device[1]) + ", "
     
     print('Device numbers\n-------------------------')
     print(device_numbers_with_no_data)

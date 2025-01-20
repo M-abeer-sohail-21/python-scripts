@@ -4,10 +4,10 @@ from json import load
 from re import search
 from ignore_constants import sensor_id_list
 from os import path, remove
-from pytz import timezone
-from ijson import parse
-from datasets import load_dataset
 from datetime import datetime
+# from ijson import parse
+# from datasets import load_dataset
+# from pytz import timezone
 
 def delete_columns(col):
     global df
@@ -98,8 +98,9 @@ def filter_by_column(column, list_of_vals, return_not = False):
 
 # Edit here START ----------------------------------------------------------------------
 BASE_PATH = "/home/sarwan/Downloads" # work/scratchpad/python-scripts"
-FILE_SUFFIXES =  ['02']
-INPUT_FILE_PREFIX=  'devices'
+FILE_SUFFIXES =  None # ['01']
+INPUT_FILE_PREFIX=  'albusayra-invixible.devices-01'
+DATA_ARRAY = None
 GENERATE_BASE_CSV = False # TODO: Logic needs fixing
 LARGE_DATASET = False # TODO: Logic needs fixing, ALWAYS SET TO FALSE
 USE_TEMP_PATH = False
@@ -114,13 +115,20 @@ while LARGE_DATASET:
         else:
             exit()
 
-number_of_files = len(FILE_SUFFIXES)
+number_of_files = 1
+if FILE_SUFFIXES:
+    number_of_files = len(FILE_SUFFIXES)
 
 for i in range(number_of_files):
 
-    INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.json'
-    OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
-    TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
+    if FILE_SUFFIXES:
+        INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.json'
+        OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
+        TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
+    else:
+        INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}.json'
+        OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}.csv'
+        TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-temp.csv'
 
     df = None
     temp_file_available = False
@@ -137,7 +145,10 @@ for i in range(number_of_files):
             if GENERATE_BASE_CSV:
                 with open(INPUT_PATH, 'r') as file:
                     data = load(file)
-                    df = json_normalize(data)
+                    if DATA_ARRAY:
+                        df = json_normalize(data[DATA_ARRAY])
+                    else:
+                        df = json_normalize(data)
                     if str(type(df)) != "<class 'NoneType'>":
                         df.to_csv(TEMP_PATH, index=False)
 
@@ -151,7 +162,10 @@ for i in range(number_of_files):
     else:
         with open(INPUT_PATH, 'r') as file:
             data = load(file)
-            df = json_normalize(data)
+            if DATA_ARRAY:
+                df = json_normalize(data[DATA_ARRAY])
+            else:
+                df = json_normalize(data)
     
     if str(type(df)) != "<class 'NoneType'>":
         # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
@@ -172,13 +186,7 @@ for i in range(number_of_files):
         df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
         df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
         
-        rearrange_columns(columns_order)
-
-        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
-
-        # -------------------------------- Check JM overheating device ----------------------------------- #
-
-
+        # rearrange_columns(columns_order)
 
         # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
         
