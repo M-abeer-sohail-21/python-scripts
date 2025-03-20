@@ -2,9 +2,9 @@ from pandas import read_csv, json_normalize, to_datetime, notnull, DataFrame, re
 from csv import reader
 from json import load
 from re import search
-from ignore_constants import sensor_id_list
 from os import path, remove
 from datetime import datetime
+# from ignore_constants import sensor_id_list
 # from ijson import parse
 # from datasets import load_dataset
 # from pytz import timezone
@@ -97,10 +97,10 @@ def filter_by_column(column, list_of_vals, return_not = False):
     return filtered_df
 
 # Edit here START ----------------------------------------------------------------------
-BASE_PATH = "/home/sarwan/Downloads" # work/scratchpad/python-scripts"
+BASE_PATH = "C:\\Users\\bvsab\\Downloads" # work/scratchpad/python-scripts"
 FILE_SUFFIXES =  None # ['01']
-INPUT_FILE_PREFIX=  'albusayra-invixible.devices-01'
-DATA_ARRAY = None
+INPUT_FILE_PREFIX=  'temp-abds-devices'
+DATA_ARRAY = 'managedObjects'
 GENERATE_BASE_CSV = False # TODO: Logic needs fixing
 LARGE_DATASET = False # TODO: Logic needs fixing, ALWAYS SET TO FALSE
 USE_TEMP_PATH = False
@@ -126,9 +126,9 @@ for i in range(number_of_files):
         OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
         TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
     else:
-        INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}.json'
-        OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}.csv'
-        TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-temp.csv'
+        INPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}.json'
+        OUTPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}.csv'
+        TEMP_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}-temp.csv'
 
     df = None
     temp_file_available = False
@@ -174,17 +174,17 @@ for i in range(number_of_files):
         # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
         # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
 
-        columns_order = ['imei','internalId','bike_number',	'name',	'hub_iccid', 'c8y_iccid', 'status', 'lastMessage']
+        columns_order = ['imei','id', 'name', 'c8y_Availability.status', 'c8y_Availability.lastMessage', 'c8y_RequiredAvailability.responseInterval', 'lastUpdated']
 
-        replace_substring_from_columns('packetFromPlatform.c8y_Mobile.','')
-        replace_substring_from_columns('packetFromPlatform.c8y_Availability.','')
-        replace_substring_from_columns('packetFromPlatform.c8y_Hardware.','')
+        replace_substring_from_columns('c8y_Mobile.','')
+        # replace_substring_from_columns('c8y_Availability.','')
+        replace_substring_from_columns('c8y_Hardware.','')
         replace_substring_from_columns('iccid','c8y_iccid')
         replace_substring_from_columns('serialNumber','hub_iccid')
         delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
-        df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
-        df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
-        df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
+        # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+        # df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
+        # df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
         
         # rearrange_columns(columns_order)
 
