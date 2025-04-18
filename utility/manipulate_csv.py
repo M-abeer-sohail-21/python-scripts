@@ -97,10 +97,10 @@ def filter_by_column(column, list_of_vals, return_not = False):
     return filtered_df
 
 # Edit here START ----------------------------------------------------------------------
-BASE_PATH = "C:\\Users\\bvsab\\Downloads" # work/scratchpad/python-scripts"
+BASE_PATH = "C:\\Users\\bvsab\\Documents" # work/scratchpad/python-scripts"
 FILE_SUFFIXES =  None # ['01']
-INPUT_FILE_PREFIX=  'temp-abds-devices'
-DATA_ARRAY = 'managedObjects'
+INPUT_FILE_PREFIX=  'albusayra-invixible.devices'
+DATA_ARRAY = None
 GENERATE_BASE_CSV = False # TODO: Logic needs fixing
 LARGE_DATASET = False # TODO: Logic needs fixing, ALWAYS SET TO FALSE
 USE_TEMP_PATH = False
@@ -120,11 +120,11 @@ if FILE_SUFFIXES:
     number_of_files = len(FILE_SUFFIXES)
 
 for i in range(number_of_files):
-
+    # TODO For all file paths use os.join()
     if FILE_SUFFIXES:
-        INPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.json'
-        OUTPUT_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
-        TEMP_PATH = f'{BASE_PATH}/{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
+        INPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.json'
+        OUTPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}.csv'
+        TEMP_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}-{FILE_SUFFIXES[i]}-temp.csv'
     else:
         INPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}.json'
         OUTPUT_PATH = f'{BASE_PATH}\\{INPUT_FILE_PREFIX}.csv'
@@ -168,7 +168,7 @@ for i in range(number_of_files):
                 df = json_normalize(data)
     
     if str(type(df)) != "<class 'NoneType'>":
-        # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
+        # --------------- FOR ABDS BIKES (TEMPORARY!!!) ----------------------------------------------------------------- #
         
         df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
         # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
@@ -185,6 +185,28 @@ for i in range(number_of_files):
         # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
         # df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
         # df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
+        
+        # rearrange_columns(columns_order)
+
+        # -------------------------------------XXXXXXXXXXXXXXXXXX----------------------------------------- #
+
+        # --------------- FOR ABDS BIKES ----------------------------------------------------------------- #
+        
+        # df['bike_number'] = df['name'].apply(lambda x: extract_substring(x, r'\b(\d{5})\b'))
+        # # df['updatedAt.unix'] = to_datetime(df['updatedAt.$date.$numberLong'], unit='ms')
+        # # df['updatedAt'] = df['updatedAt.unix'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
+
+        # columns_order = ['imei','id', 'name', 'c8y_Availability.status', 'c8y_Availability.lastMessage', 'c8y_RequiredAvailability.responseInterval', 'lastUpdated']
+
+        # replace_substring_from_columns('c8y_Mobile.','')
+        # # replace_substring_from_columns('c8y_Availability.','')
+        # replace_substring_from_columns('c8y_Hardware.','')
+        # replace_substring_from_columns('iccid','c8y_iccid')
+        # replace_substring_from_columns('serialNumber','hub_iccid')
+        # delete_columns(list(set(df.columns.tolist()) - set(columns_order)))
+        # # df['status'] = df['status'].replace('UNAVAILABLE', 'DOWN').replace('AVAILABLE','ACTIVE')
+        # # df['lastMessage'] = df['lastMessage'].apply(lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S.%fZ"))
+        # # df['lastMessage'] = df['lastMessage'].apply(lambda x: x.tz_localize('UTC').tz_convert(LOCAL_TIMEZONE).isoformat())
         
         # rearrange_columns(columns_order)
 
